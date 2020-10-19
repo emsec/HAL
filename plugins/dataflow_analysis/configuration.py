@@ -8,9 +8,9 @@ username = getpass.getuser()
 
 path_to_core_collection = "/home/" + username + "/hal-benchmarks"
 path_to_hal = "/home/" + username + "/hal"
-path_to_hal_build = path_to_hal + "/build-release"
+path_to_hal_build = path_to_hal + "/build"
 path_to_hal_bin = path_to_hal_build + "/bin/hal"
-path_dataflow_out = path_to_hal_build + "/dataflow_out"
+path_dataflow_out = "/home/" + username + "/hal/dataflow_out"
 
 netlists = dict()
 netlists["vivado"] = dict()

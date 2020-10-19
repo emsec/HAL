@@ -2,9 +2,11 @@
 
 #include "dataflow_analysis/common/grouping.h"
 #include "dataflow_analysis/common/netlist_abstraction.h"
+#include "dataflow_analysis/evaluation/compare_to_reference.h"
 #include "dataflow_analysis/evaluation/configuration.h"
 #include "dataflow_analysis/evaluation/context.h"
 #include "dataflow_analysis/evaluation/evaluation.h"
+#include "dataflow_analysis/evaluation/generate_reference.h"
 #include "dataflow_analysis/output_generation/dot_graph.h"
 #include "dataflow_analysis/output_generation/json.hpp"
 #include "dataflow_analysis/output_generation/json_output.h"
@@ -201,6 +203,18 @@ namespace hal
 
         log_info("dataflow", "");
 
+        // =================================================================================================
+
+        // create golden model
+        auto ref_state = dataflow::evaluation::generate_reference(netlist_abstr);
+        dataflow::textual_output::write_register_output(ref_state, {}, output_path, "ref_state.txt");
+
+        /* create control_state */
+        //eval_ctx.control_state = group_by_control_signals::pure_control_signals_process(initial_grouping, true, true, true);
+        //textual_output::write_register_output(eval_ctx.control_state, evaluation::compare_to_reference(eval_ctx.control_state, ref_state), output_path, "control_grouping.txt");
+
+        // =================================================================================================
+
         nlohmann::json output_json;
 
         u32 iteration = 0;
@@ -218,10 +232,15 @@ namespace hal
 
             total_time += (double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - begin_time).count() / 1000;
 
-            std::string file_name = "result" + std::to_string(iteration) + ".txt";
-            dataflow::textual_output::write_register_output(eval_result.merged_result, output_path, file_name);
+            // =================================================================================================
+            // compare to golden model
+            auto similarity_scores = dataflow::evaluation::compare_to_reference(processing_result, eval_result, ref_state);
 
-            dataflow::json_output::save_state_to_json(iteration, netlist_abstr, processing_result, eval_result, false, output_json);
+            std::string file_name = "result" + std::to_string(iteration) + ".txt";
+            dataflow::textual_output::write_register_output(eval_result.merged_result, similarity_scores.at(eval_result.merged_result), output_path, file_name);
+
+            dataflow::json_output::save_state_to_json(iteration, netlist_abstr, processing_result, eval_result, similarity_scores, false, output_json);
+            // =================================================================================================
 
             // end of analysis(?)
 
@@ -247,8 +266,8 @@ namespace hal
         std::ofstream(output_path + "eval.json", std::ios_base::app) << std::setw(4) << output_json << std::endl;
 
         // dot_graph::create_graph(final_grouping, output_path + "result_", {"png", "pdf"});
-        // dot_graph::create_graph(final_grouping, output_path + "result_", {"png"});
-        // dot_graph::create_graph(final_grouping, output_path + "result_", {"pdf"});
+        //dot_graph::create_graph(final_grouping, output_path + "result_", {"png"});
+        //dot_graph::create_graph(final_grouping, output_path + "result_", {"pdf"});
 
         log("dataflow processing finished in {:3.2f}s", total_time);
 

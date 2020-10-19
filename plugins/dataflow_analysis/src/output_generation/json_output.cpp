@@ -21,6 +21,7 @@ namespace hal
                                     const NetlistAbstraction& netlist_abstr,
                                     const processing::Result& processing_result,
                                     const evaluation::Result& eval_result,
+                                    const std::unordered_map<std::shared_ptr<Grouping>, evaluation::SimilarityScore>& similarity_scores,
                                     bool with_gates,
                                     nlohmann::json& j)
             {
@@ -34,6 +35,16 @@ namespace hal
                 {
                     const auto& state    = grouping.second;
                     std::string state_id = "state_" + std::to_string(++state_counter);
+
+                    if (similarity_scores.find(state) != similarity_scores.end())
+                    {
+                        const auto& score = similarity_scores.at(state);
+
+                        j[netlist_abstr.nl->get_design_name()][round_id][state_id]["NMI"]    = score.nmi;
+                        j[netlist_abstr.nl->get_design_name()][round_id][state_id]["purity"] = score.purity;
+
+                        j[netlist_abstr.nl->get_design_name()][round_id][state_id]["passes"] = grouping.first;
+                    }
 
                     if (with_gates)
                     {
@@ -54,6 +65,13 @@ namespace hal
 
                 const auto& state    = eval_result.merged_result;
                 std::string state_id = "result";
+
+                const auto& score = similarity_scores.at(state);
+
+                j[netlist_abstr.nl->get_design_name()][round_id][state_id]["NMI"]    = score.nmi;
+                j[netlist_abstr.nl->get_design_name()][round_id][state_id]["purity"] = score.purity;
+
+                j[netlist_abstr.nl->get_design_name()][round_id][state_id]["passes"] = "";
 
                 if (with_gates)
                 {

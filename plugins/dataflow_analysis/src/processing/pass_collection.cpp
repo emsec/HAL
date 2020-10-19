@@ -2,6 +2,10 @@
 
 #include "dataflow_analysis/processing/passes/group_by_control_signals.h"
 #include "dataflow_analysis/processing/passes/group_by_input_output_size.h"
+#include "dataflow_analysis/processing/passes/group_by_snn_gates_fixed.h"
+#include "dataflow_analysis/processing/passes/group_by_snn_gates_percent.h"
+#include "dataflow_analysis/processing/passes/group_by_snn_groups_fixed.h"
+#include "dataflow_analysis/processing/passes/group_by_snn_groups_percent.h"
 #include "dataflow_analysis/processing/passes/group_by_successors_predecessors.h"
 #include "dataflow_analysis/processing/passes/group_by_successors_predecessors_iteratively.h"
 #include "dataflow_analysis/processing/passes/merge_successor_predecessor_groupings.h"
@@ -114,4 +118,4 @@ namespace hal
             }    // namespace pass_collection
         }        // namespace processing
     }            // namespace dataflow
-}
+}    // namespace hal

@@ -2,6 +2,7 @@
 
 #include "dataflow_analysis/common/grouping.h"
 #include "dataflow_analysis/common/netlist_abstraction.h"
+#include "dataflow_analysis/evaluation/similarity_score.h"
 #include "hal_core/netlist/gate.h"
 #include "hal_core/netlist/net.h"
 #include "hal_core/netlist/netlist.h"
@@ -16,12 +17,14 @@ namespace hal
     {
         namespace textual_output
         {
-            void write_register_output(const std::shared_ptr<Grouping>& state, const std::string m_path, const std::string file_name)
+            void write_register_output(const std::shared_ptr<Grouping>& state, const evaluation::SimilarityScore& score, const std::string m_path, const std::string file_name)
             {
                 std::string m_path_textual_ouptut = m_path + file_name;
                 std::ofstream result_out(m_path_textual_ouptut, std::ofstream::out);
 
                 result_out << "State:";
+                result_out << "\n\nNMI: " << score.nmi;
+                result_out << "\npurity: " << score.purity;
                 result_out << "\n\n";
 
                 for (const auto& [group_id, gates] : state->gates_of_group)
