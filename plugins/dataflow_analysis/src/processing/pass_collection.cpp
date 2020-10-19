@@ -7,6 +7,11 @@
 #include "dataflow_analysis/processing/passes/merge_successor_predecessor_groupings.h"
 #include "dataflow_analysis/processing/passes/split_by_successors_predecessors.h"
 
+#include "dataflow_analysis/processing/passes/group_by_snn_gates_fixed.h"
+#include "dataflow_analysis/processing/passes/group_by_snn_gates_percent.h"
+#include "dataflow_analysis/processing/passes/group_by_snn_groups_fixed.h"
+#include "dataflow_analysis/processing/passes/group_by_snn_groups_percent.h"
+
 #include <algorithm>
 
 namespace hal
@@ -44,6 +49,19 @@ namespace hal
                 PassConfiguration split_by_successors;
                 PassConfiguration split_by_predecessors;
 
+                PassConfiguration group_by_snn_gates_fixed_8;
+                PassConfiguration group_by_snn_gates_fixed_32;
+
+                PassConfiguration group_by_snn_gates_percent;
+
+                PassConfiguration group_by_snn_groups_fixed;
+                PassConfiguration group_by_snn_groups_fixed_successors;
+                PassConfiguration group_by_snn_groups_fixed_predecessors;
+
+                PassConfiguration group_by_snn_groups_percent;
+                PassConfiguration group_by_snn_groups_percent_successors;
+                PassConfiguration group_by_snn_groups_percent_predecessors;
+
                 void initialize()
                 {
                     using namespace std::placeholders;
@@ -61,8 +79,26 @@ namespace hal
                     group_by_successors_iteratively   = m_all_passes.emplace_back(std::bind(&group_by_successors_predecessors_iteratively::process, _1, true));
                     group_by_predecessors_iteratively = m_all_passes.emplace_back(std::bind(&group_by_successors_predecessors_iteratively::process, _1, false));
 
+                    //group_by_snn_groups_percent_successors  = m_all_passes.emplace_back(std::bind(&group_by_snn_groups_percent::process, _1, true, false, 1.0));
+                    //group_by_snn_groups_percent_predecessors = m_all_passes.emplace_back(std::bind(&group_by_snn_groups_percent::process, _1, false, true, 1.0));
+
                     split_by_successors   = m_all_passes.emplace_back(std::bind(&split_by_successors_predecessors::process, _1, true));
                     split_by_predecessors = m_all_passes.emplace_back(std::bind(&split_by_successors_predecessors::process, _1, false));
+
+                    //group_by_snn_gates_fixed_8   = m_all_passes.emplace_back(std::bind(&group_by_snn_gates_fixed::process, _1, true, true, 8));
+                    //group_by_snn_gates_fixed_32  = m_all_passes.emplace_back(std::bind(&group_by_snn_gates_fixed::process, _1, true, true, 32));
+
+                    //group_by_snn_gates_percent = m_all_passes.emplace_back(std::bind(&group_by_snn_gates_percent::process, _1, true, true, 0.2));
+                    //group_by_snn_gates_percent = m_all_passes.emplace_back(std::bind(&group_by_snn_gates_percent::process, _1, true, true, 0.75));
+                    //group_by_snn_gates_percent = m_all_passes.emplace_back(std::bind(&group_by_snn_gates_percent::process, _1, true, true, 0.9));
+
+                    //group_by_snn_groups_fixed = m_all_passes.emplace_back(std::bind(&group_by_snn_groups_fixed::process, _1, true, true, 8));
+                    //group_by_snn_groups_fixed_successors   = m_all_passes.emplace_back(std::bind(&group_by_snn_groups_fixed::process, _1, true, false, 32));
+                    //group_by_snn_groups_fixed_predecessors = m_all_passes.emplace_back(std::bind(&group_by_snn_groups_fixed::process, _1, false, true, 32));
+
+                    //group_by_snn_groups_percent = m_all_passes.emplace_back(std::bind(&group_by_snn_groups_percent::process, _1, true, true, 0.2));
+                    //group_by_snn_groups_percent = m_all_passes.emplace_back(std::bind(&group_by_snn_groups_percent::process, _1, true, true, 0.75));
+                    //group_by_snn_groups_percent = m_all_passes.emplace_back(std::bind(&group_by_snn_groups_percent::process, _1, true, true, 0.9));
 
                     m_useless_follow_ups[group_by_successors.id].insert(split_by_successors.id);
                     m_useless_follow_ups[group_by_predecessors.id].insert(split_by_predecessors.id);
