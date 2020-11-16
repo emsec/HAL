@@ -3,6 +3,12 @@
 #include <fstream>
 #include <vector>
 
+#include "hal_core/netlist/gate_library/gate_library.h"
+#include "hal_core/netlist/gate_library/gate_library_manager.h"
+#include "hal_core/netlist/hdl_parser/hdl_parser.h"
+#include "hal_core/netlist/hdl_parser/hdl_parser_manager.h"
+#include "hal_core/netlist/netlist.h"
+
 namespace hal
 {
 
@@ -68,7 +74,7 @@ namespace hal
             log_error("bitstream", "output path parameter not set");
         }
 
-        std::string db_root = "/home/sinanboecker/Dokumente/Workspace/symbiflow-xc-fasm2bels/third_party/prjxray-db";
+        std::string db_root = "/home/sinanboecker/Dokumente/Workspace/symbiflow-xc-fasm2bels/third_party/prjxray/database";
         std::string bitread = "/home/sinanboecker/Dokumente/Workspace/symbiflow-xc-fasm2bels/third_party/prjxray/build/tools/bitread";
         std::string db_path = out_path + "connection.db";
         std::string fasm_path = out_path + "out.fasm";
@@ -175,6 +181,19 @@ namespace hal
         }
 
         log_info("bitstream", "{}", result);
+
+        auto gate_library = gate_library_manager::get_gate_library("XILINX_UNISIM.lib"); // insert correct gate lib here
+        if (gate_library == nullptr)
+        {
+            log_error("bitstream", "gate library not found");
+            return false;
+        }
+        auto netlist = hdl_parser_manager::parse(v_path, gate_library);
+        if (netlist == nullptr)
+        {
+            log_error("bitstream", "netlist could not be parsed");
+            return false;
+        }
 
         return true;
     }
