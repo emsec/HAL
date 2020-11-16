@@ -1,6 +1,8 @@
 *
 !bitstream_converter*
 !bitstream_converter**/*
+!bitstream_parser*
+!bitstream_parser**/*
 !dataflow_analysis*
 !dataflow_analysis/**/*
 !example_gate_library*
