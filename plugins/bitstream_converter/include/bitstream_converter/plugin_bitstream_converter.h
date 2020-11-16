@@ -17,6 +17,9 @@ namespace hal
         ProgramOptions get_cli_options() const override;
 
         /** interface implementation: i_cli */
+        bool handle_pre_netlist_cli_call(ProgramArguments& args) override;
+
+        /** interface implementation: i_cli */
         bool handle_cli_call(Netlist* nl, ProgramArguments& args) override;
     };
 }

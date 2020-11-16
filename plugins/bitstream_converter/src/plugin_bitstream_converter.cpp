@@ -46,6 +46,12 @@ namespace hal
         return description;
     }
 
+    bool BitstreamConverterPlugin::handle_pre_netlist_cli_call(ProgramArguments& args)
+    {
+        UNUSED(args);
+        return true;
+    }
+
     bool BitstreamConverterPlugin::handle_cli_call(Netlist* nl, ProgramArguments& args)
     {
         //UNUSED(args);
@@ -53,6 +59,10 @@ namespace hal
 
         std::string bit_path;
         std::string out_path;
+
+        if (args.is_option_set("--input-file")){
+            log_info("bitstream", "Input file: {}", args.get_parameter("--bit_path"));
+        }
 
         if (args.is_option_set("--bit_path"))
         {
