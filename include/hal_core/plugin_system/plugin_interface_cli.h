@@ -52,6 +52,14 @@ namespace hal
         virtual ProgramOptions get_cli_options() const = 0;
 
         /**
+         * Entry point to handle command line interface call before netlist is available
+         *
+         * @param[in] args - Program options.
+         * @returns True on success.
+         */
+        virtual bool handle_pre_netlist_cli_call(ProgramArguments& args) = 0;
+        
+        /**
          * Entry point to handle command line interface call
          *
          * @param[in] netlist - The netlist.
