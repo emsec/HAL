@@ -249,6 +249,62 @@ int main(int argc, const char* argv[])
         lm.set_file_name(log_path.replace_extension(".log"));
     }
 
+    /* cli plugins */
+    std::vector<std::string> plugins_to_execute;
+    auto option_to_plugin_name = plugin_manager::get_cli_plugin_flags();
+    for (const auto& option : args.get_set_options())
+    {
+        auto it = option_to_plugin_name.find(option);
+        if (it != option_to_plugin_name.end())
+        {
+            if (std::find(plugins_to_execute.begin(), plugins_to_execute.end(), it->second) == plugins_to_execute.end())
+            {
+                plugins_to_execute.push_back(it->second);
+            }
+        }
+    }
+
+    //TODO call handle_pre_netlist_cli_call
+    bool pre_netlist_plugins_successful = true;
+    for (const auto& plugin_name : plugins_to_execute)
+    {
+        auto plugin = plugin_manager::get_plugin_instance<CLIPluginInterface>(plugin_name);
+        if (plugin == nullptr)
+        {
+            return cleanup(ERROR);
+        }
+
+        ProgramArguments plugin_args;
+
+        for (const auto& option : plugin->get_cli_options().get_options())
+        {
+            auto flags      = std::get<0>(option);
+            auto first_flag = *flags.begin();
+            if (args.is_option_set(first_flag))
+            {
+                plugin_args.set_option(first_flag, flags, args.get_parameters(first_flag));
+            }
+        }
+
+        log_info("core", "executing '{}' with", plugin_name);
+        for (const auto& option : plugin_args.get_set_options())
+        {
+            log_info("core", "  '{}': {}", option, utils::join(",", plugin_args.get_parameters(option)));
+        }
+
+        if (!plugin->handle_pre_netlist_cli_call(plugin_args))
+        {
+            pre_netlist_plugins_successful = false;
+            break;
+        }
+    }
+
+    if (!pre_netlist_plugins_successful)
+    {
+        return cleanup(ERROR);
+    }
+
+
     std::unique_ptr<Netlist> netlist;
 
     if (args.is_option_set("--empty-netlist"))
@@ -273,21 +329,7 @@ int main(int argc, const char* argv[])
         log_warning("core", "your modifications will not be written to a .hal file (--volatile-mode).");
     }
 
-    /* cli plugins */
-    std::vector<std::string> plugins_to_execute;
-    auto option_to_plugin_name = plugin_manager::get_cli_plugin_flags();
-    for (const auto& option : args.get_set_options())
-    {
-        auto it = option_to_plugin_name.find(option);
-        if (it != option_to_plugin_name.end())
-        {
-            if (std::find(plugins_to_execute.begin(), plugins_to_execute.end(), it->second) == plugins_to_execute.end())
-            {
-                plugins_to_execute.push_back(it->second);
-            }
-        }
-    }
-
+    // Post netlist cli
     bool plugins_successful = true;
     for (const auto& plugin_name : plugins_to_execute)
     {
