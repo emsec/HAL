@@ -23,12 +23,12 @@
 
 #pragma once
 
-#include "hal_core/utilities/token_stream.h"
-#include "hal_core/defines.h"
 #include "bitstream_parser/hdl_parser_template.h"
-#include "hal_core/plugin_system/plugin_interface_cli.h"
+#include "hal_core/defines.h"
 #include "hal_core/netlist/module.h"
 #include "hal_core/netlist/net.h"
+#include "hal_core/plugin_system/plugin_interface_cli.h"
+#include "hal_core/utilities/token_stream.h"
 
 #include <optional>
 #include <unordered_map>
@@ -43,15 +43,25 @@ namespace hal
     class HDL_PARSER_API HDLParserBitstream : public HDLParserTemplate<core_strings::CaseInsensitiveString>
     {
     public:
-        HDLParserBitstream() = default;
+        struct Configuration
+        {
+            std::string out_path;
+            std::string db_root_path;
+            std::string part;
+        };
+
+        HDLParserBitstream(const Configuration& config);
         ~HDLParserBitstream() = default;
 
         /**
          * Parses a Xilinx bitstream file to netlist and then into an intermediate format.
          *
-         * @param[in] stream - The string stream filled with the hdl code.
+         * @param[in] file_name - The file to parse.
          * @returns True on success, false otherwise.
          */
-        bool parse(std::stringstream& stream) override;
+        bool parse(const std::filesystem::path& file_name) override;
+
+    private:
+        Configuration m_config;
     };
 }    // namespace hal

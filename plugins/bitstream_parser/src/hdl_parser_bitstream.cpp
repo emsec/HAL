@@ -8,10 +8,14 @@
 
 namespace hal
 {
-
-    bool HDLParserBitstream::parse(std::stringstream& stream)
+    HDLParserBitstream::HDLParserBitstream(const Configuration& config)
     {
-        UNUSED(stream);
+        m_config = config;
+    }
+
+    bool HDLParserBitstream::parse(const std::filesystem::path& file_name)
+    {
+        UNUSED(file_name);
         return true;
     }
 

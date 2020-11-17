@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hal_core/plugin_system/plugin_interface_cli.h"
+#include "bitstream_parser/plugin_bitstream_parser.h"
 
 namespace hal
 {
@@ -21,5 +22,11 @@ namespace hal
 
         /** interface implementation: i_cli */
         bool handle_cli_call(Netlist* nl, ProgramArguments& args) override;
+
+    private:
+        HDLParserBitstream::Configuration m_configuration;
+        bool m_configuration_complete = false;
+
+        std::unique_ptr<HDLParser> create_parser();
     };
 }    // namespace hal

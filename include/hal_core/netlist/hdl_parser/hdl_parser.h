@@ -25,8 +25,6 @@
 
 #include "hal_core/defines.h"
 
-#include <sstream>
-
 namespace hal
 {
     /* forward declaration*/
@@ -45,7 +43,7 @@ namespace hal
         /**
          * Parses a netlist into an internal intermediate format.
          *
-         * @param[in] stream - The string stream filled with the hdl code.
+         * @param[in] file_name - The name of the file to parse.
          * @returns True on success, false otherwise.
          */
         virtual bool parse(const std::filesystem::path& file_name) = 0;
@@ -61,7 +59,7 @@ namespace hal
         /**
          * Parses and instantiates a netlist using the specified gate library.
          *
-         * @param[in] stream - The string stream filled with the hdl code.
+         * @param[in] file_name - The name of the file to parse.
          * @param[in] gl - The gate library.
          * @returns A pointer to the resulting netlist.
          */
