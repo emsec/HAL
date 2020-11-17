@@ -4,6 +4,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [3.1.5] - 2020-11-16 14:30:00+02:00 (urgency: medium)
+* fixed and expanded Python decorators for logging in study environment to additionally cover the GUI
+* fixed infinite loop when renaming groupings using the GUI
+
+## [3.1.4] - 2020-11-15 14:00:00+02:00 (urgency: medium)
+* added tests for `netlist_utils`
+* fixed crash when creating invalid module when using `netlist::create_module`
+* fixed assigning nets instead of gates when copying netlist using `netlist_utils::copy_netlist`
+* fixed `netlist_utils::copy_netlist` not copying port names
+* fixed `netlist_utils::get_subgraph_function` crashing on unconnected input pin
+* fixed infinite loop within `netlist_utils::get_subgraph_function` if the combinational logic contains a feedback path
+
+## [3.1.3] - 2020-11-12 17:15:00+02:00 (urgency: medium)
+* GUI code refactoring
+* fix crash which occurs sometimes when invoking context menu from gate
+	
+## [3.1.2] - 2020-11-09 20:00:00+02:00 (urgency: medium)
+* updated existing Python decorators and added new ones for the GUI API
+* fix `get_subgraph_function` crashing when `output_net` is a nullptr
+
+## [3.1.1] - 2020-11-05 16:18:00+02:00 (urgency: medium)
+* fix bug that preventes module widget from showing the full tree in some instances
+* fix missing cleaup of groupings when deleting gates, nets, or modules
+* display Python Editor Widget by default, but hide its navigation bar
+* do not display Log Widget by default anymore
+
+## [3.1.0] - 2020-11-04 14:00:00+02:00 (urgency: medium)
+* new (deterministic) layouter
+  * tries to minimize wire length by placing connected gates closer to each other
+  * combines multiple in-/outputs into one port if driven by the same net
+  * cleaner overall appearance of the graph
+* added Python tool to convert SkyWater gate libraries into a Liberty file that can be read by HAL
+* fix bug with selection within grouping widget
+* fix return code of GUI
+* fixed problems when dragging around the docking bars of widgets
+* Fix detect Library Path
+
 ## [3.0.2] - 2020-10-29 16:00:00+02:00 (urgency: medium)
 * Focal Test Release 2
 
@@ -352,7 +391,16 @@ Note: This is an API breaking release.
 * Initial Release
 
 [//]: # (Hyperlink section)
-[Unreleased]: https://github.com/emsec/hal/compare/v1.1.8...HEAD
+[Unreleased]: https://github.com/emsec/hal/compare/v3.1.5...HEAD
+[3.1.5]: https://github.com/emsec/hal/compare/v3.1.4...v3.1.5
+[3.1.4]: https://github.com/emsec/hal/compare/v3.1.3...v3.1.4
+[3.1.3]: https://github.com/emsec/hal/compare/v3.1.2...v3.1.3
+[3.1.2]: https://github.com/emsec/hal/compare/v3.1.1...v3.1.2
+[3.1.1]: https://github.com/emsec/hal/compare/v3.1.0...v3.1.1
+[3.1.0]: https://github.com/emsec/hal/compare/v3.0.2...v3.1.0
+[3.0.2]: https://github.com/emsec/hal/compare/v3.0.1...v3.0.2
+[3.0.1]: https://github.com/emsec/hal/compare/v3.0.0...v3.0.1
+[3.0.0]: https://github.com/emsec/hal/compare/v2.0.0...v3.0.0
 [2.0.0]: https://github.com/emsec/hal/compare/v1.1.8...v2.0.0
 [1.1.8]: https://github.com/emsec/hal/compare/v1.1.7...v1.1.8
 [1.1.7]: https://github.com/emsec/hal/compare/v1.1.6...v1.1.7
