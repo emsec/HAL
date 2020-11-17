@@ -51,7 +51,7 @@ namespace hal
          * @param[in] stream - The string stream filled with the hdl code.
          * @returns True on success, false otherwise.
          */
-        bool parse(std::stringstream& stream) override;
+        bool parse(const std::filesystem::path& file_name) override;
 
     private:
         TokenStream<std::string> m_token_stream;

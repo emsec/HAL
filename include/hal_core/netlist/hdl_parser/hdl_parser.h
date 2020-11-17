@@ -48,7 +48,7 @@ namespace hal
          * @param[in] stream - The string stream filled with the hdl code.
          * @returns True on success, false otherwise.
          */
-        virtual bool parse(std::stringstream& stream) = 0;
+        virtual bool parse(const std::filesystem::path& file_name) = 0;
 
         /**
          * Instantiates the parsed netlist using a specific gate library.
@@ -65,9 +65,9 @@ namespace hal
          * @param[in] gl - The gate library.
          * @returns A pointer to the resulting netlist.
          */
-        std::unique_ptr<Netlist> parse_and_instantiate(std::stringstream& stream, const GateLibrary* gl)
+        std::unique_ptr<Netlist> parse_and_instantiate(const std::filesystem::path& file_name, const GateLibrary* gl)
         {
-            if (parse(stream))
+            if (parse(file_name))
             {
                 return instantiate(gl);
             }

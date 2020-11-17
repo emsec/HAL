@@ -42,21 +42,8 @@ namespace hal
 
                 log_info("hdl_parser", "parsing '{}'...", file_name.string());
 
-                // read file into stringstream
-                std::stringstream stream;
-                {
-                    std::ifstream ifs;
-                    ifs.open(file_name.c_str(), std::ifstream::in);
-                    if (!ifs.is_open())
-                    {
-                        log_error("hdl_parser", "could not open file '{}'", file_name.string());
-                        return {};
-                    }
-                    stream << ifs.rdbuf();
-                    ifs.close();
-                }
-
-                if (!parser->parse(stream))
+                // TODO move stream operations to parsers, only pass file path to parsers
+                if (!parser->parse(file_name))
                 {
                     log_error("hdl_parser", "could not parse file '{}'.", file_name.string());
                     return {};

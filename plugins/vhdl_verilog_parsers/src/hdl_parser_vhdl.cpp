@@ -12,8 +12,22 @@ namespace hal
     // ###########          Parse HDL into intermediate format          ##########
     // ###########################################################################
 
-    bool HDLParserVHDL::parse(std::stringstream& stream)
+    bool HDLParserVHDL::parse(const std::filesystem::path& file_name)
     {
+        // read file into stringstream
+        std::stringstream stream;
+        {
+            std::ifstream ifs;
+            ifs.open(file_name.c_str(), std::ifstream::in);
+            if (!ifs.is_open())
+            {
+                log_error("hdl_parser", "could not open file '{}'", file_name.string());
+                return {};
+            }
+            stream << ifs.rdbuf();
+            ifs.close();
+        }
+
         m_fs = &stream;
         // tokenize file
         if (!tokenize())
