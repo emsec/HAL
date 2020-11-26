@@ -46,11 +46,11 @@ namespace hal
         {
             if (e.line_number != (u32)-1)
             {
-                log_error("hdl_parser", "{} near line {}", e.message, e.line_number);
+                log_error("hdl_parser", "{} near line {}.", e.message, e.line_number);
             }
             else
             {
-                log_error("hdl_parser", "{}", e.message);
+                log_error("hdl_parser", "{}.", e.message);
             }
             return false;
         }
@@ -82,7 +82,7 @@ namespace hal
 
             for (char c : line)
             {
-                if (c == '\\')
+                if (in_string == false && c == '\\')
                 {
                     escaped = true;
                     continue;

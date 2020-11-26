@@ -84,7 +84,7 @@ namespace hal
             }
             for (char c : utils::trim(line))
             {
-                if (c == '\\')
+                if (in_string == false && c == '\\')
                 {
                     escaped = !escaped;
                     continue;
