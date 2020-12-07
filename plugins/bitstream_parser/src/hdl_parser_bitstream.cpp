@@ -29,6 +29,9 @@ namespace hal
     {
         m_config.out_path = dirnameOf(file_name);
 
+        // TODO delete existing files
+
+        // set necessary infos
         std::string db_path = m_config.out_path + "connection.db";
         std::string fasm_path = m_config.out_path + "out.fasm";
         m_v_path = m_config.out_path + "out.v";
@@ -39,26 +42,20 @@ namespace hal
         // get part from bitstream
         // open the file:
         std::ifstream file(file_name, std::ios::binary);
-
         // Stop eating new lines in binary mode!!!
         file.unsetf(std::ios::skipws);
-
         // get its size:
         std::streampos fileSize;
-
         file.seekg(0, std::ios::end);
         fileSize = file.tellg();
         file.seekg(0, std::ios::beg);
-
         // reserve capacity
         std::vector<char> vec;
         vec.reserve(fileSize);
-
         // read the data:
         vec.insert(vec.begin(),
                 std::istream_iterator<char>(file),
                 std::istream_iterator<char>());
-
         std::string bin_part = "";
 
         for (int i = 0x51; i<=0x5B; i++){
@@ -122,20 +119,11 @@ namespace hal
         std::string cmd = "python3 -mfasm2bels --connection_database " + db_path + " --db_root " + m_config.db_root_path + "/" + device + " --part " + bin_part + " --fasm_file " + fasm_path + " --bit_file " + file_name.string() + " --bitread " + m_config.bitread_path + " --verilog_file " + m_v_path + " --xdc_file " + xdc_path + " --iostandard LVCMOS33 --drive 16";
         log_info("bitstream", "Command: {}", cmd);
 
-
-        // std::array<char, 128> buffer;
-        // std::string result;
-        // std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
-        // if (!pipe) {
-        //     throw std::runtime_error("popen() failed!");
-        // }
-        // while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
-        //     result += buffer.data();
-        // }
-
-        // log_info("bitstream", "{}", result);
-
-        return true;
+        if (std::filesystem::exists(m_v_path)) {
+            return true;   
+        } else {
+            return false;
+        }
     }
 
     std::unique_ptr<Netlist> HDLParserBitstream::instantiate(const GateLibrary* gl){
