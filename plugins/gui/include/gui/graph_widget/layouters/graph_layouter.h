@@ -63,12 +63,12 @@ namespace hal
 
         class SceneCoordinate
         {
-            int minLane;
-            int maxLane;
+            int mMinLane;
+            int mMaxLane;
             float mOffset;
             float mPadding;
         public:
-            SceneCoordinate() : minLane(0), maxLane(0), mOffset(0), mPadding(0) {;}
+            SceneCoordinate() : mMinLane(0), mMaxLane(0), mOffset(0), mPadding(0) {;}
             void testMinMax(int ilane);
             void setOffset(float off) { mOffset = off; }
             void setPadding(float pad) { mPadding = pad; }
@@ -76,9 +76,9 @@ namespace hal
             void setOffsetYej(const SceneCoordinate& previous, float maximumBlock, float minimumJunction);
             void setOffsetX(const SceneCoordinate& previous, float maximumBlock, float sepOut, float sepInp);
             float lanePosition(int ilane) const;
-            int preLanes() const { return -minLane; }
-            float junctionEntry() const { return lanePosition(minLane); }
-            float junctionExit() const { return lanePosition(maxLane-1); }
+            int preLanes() const { return -mMinLane; }
+            float junctionEntry() const { return lanePosition(mMinLane); }
+            float junctionExit() const { return lanePosition(mMaxLane-1); }
             float xBoxOffset() const;
         };
 
@@ -130,6 +130,36 @@ namespace hal
             SeparatedNetWidth() : mInputSpace(0), mOutputSpace(0) {;}
             void requireInputSpace(float spc);
             void requireOutputSpace(float spc);
+        };
+
+        class SceneCoordinateLookup
+        {
+            class JunctionIndex
+            {
+            public:
+                int min;
+                int max;
+                int index;
+                int count() const { return max - min; }
+            };
+
+            int mXgrid;
+            int mYgrid;
+            int mYtable;
+            int mXtable;
+            float* mXscene;
+            float* mYscene;
+            JunctionIndex** mXindex;
+            JunctionIndex** mYindex;
+
+            int xIndex(int ix, int vlane) const;
+            int yIndex(int ix, int iy, int hlane) const;
+        public:
+            SceneCoordinateLookup(const QMap<int,SceneCoordinate>& xsc,
+                                  const QMap<int,SceneCoordinate>& ysc);
+            ~SceneCoordinateLookup();
+            float getX(int ix, int vlane) const;
+            float getY(int ix, int iy, int hlane) const;
         };
 
         struct Road
@@ -379,6 +409,7 @@ namespace hal
         QHash<u32,EndpointList> mWireEndpoint;
         QHash<u32,int> mGlobalInputHash;
         QHash<u32,int> mGlobalOutputHash;
+        SceneCoordinateLookup* mCoordLookup;
     };
 }
 

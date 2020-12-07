@@ -1160,6 +1160,7 @@ namespace hal
     {
         // lane for given wire and net id
         QHash<u32,QHash<NetLayoutWire,int>> laneMap;
+        mCoordLookup = new SceneCoordinateLookup(mCoordX,mCoordY);
 
         for (auto it=mWireHash.constBegin(); it!=mWireHash.constEnd(); ++it)
         {
@@ -1297,6 +1298,7 @@ namespace hal
                 mScene->addGraphItem(graphicsNet);
 
         }
+        delete mCoordLookup;
     }
 
     void GraphLayouter::drawNetsIsolated(u32 id, Net* n, const EndpointList &epl)
@@ -1374,9 +1376,12 @@ namespace hal
             }
         }
     }
-
+/*
     void GraphLayouter::drawNetsJunction(StandardGraphicsNet::Lines& lines, u32 id)
     {
+//        QFile of(QString("/tmp/jun/dnj%1").arg(id,6,10,QChar('0')));
+//        of.open(QIODevice::WriteOnly);
+//        QTextStream xout(&of);
         for (auto jt = mJunctionHash.constBegin(); jt!=mJunctionHash.constEnd(); ++jt)
         {
             auto epcIt = mEndpointHash.find(jt.key());
@@ -1395,6 +1400,7 @@ namespace hal
                             ? epcIt.value().lanePosition(jw.mRoad,true)
                             : mCoordY.value(y).lanePosition(jw.mRoad);
                     lines.appendHLine(x0,x1,yy);
+//                    xout << "h " << x << " " << y << " " << jw.mRoad << " " << jw.mFirst << " " << jw.mLast << "\n";
                 }
                 else
                 {
@@ -1416,10 +1422,48 @@ namespace hal
                         if (y1 <= y0) y1 = y0 + 1;
                     }
                     float xx = mCoordX.value(x).lanePosition(jw.mRoad);
+//                    xout << "v " << x << " " << y << " " << jw.mRoad << " " << jw.mFirst << " " << jw.mLast << "\n";
                     lines.appendVLine(xx,y0,y1);
                 }
             }
         }
+//        xout.flush();
+    }
+*/
+    void GraphLayouter::drawNetsJunction(StandardGraphicsNet::Lines& lines, u32 id)
+    {
+//        QFile of(QString("/tmp/jun/dnj%1").arg(id,6,10,QChar('0')));
+//        of.open(QIODevice::WriteOnly);
+//        QTextStream xout(&of);
+        for (auto jt = mJunctionHash.constBegin(); jt!=mJunctionHash.constEnd(); ++jt)
+        {
+            auto epcIt = mEndpointHash.find(jt.key());
+            int x = jt.key().x();
+            int y = jt.key().y();
+            bool isEndpoint = (y%2 == 0);
+
+            for (const NetLayoutJunctionWire& jw : jt.value()->netById(id).mWires)
+            {
+                if (jw.mHorizontal==0)
+                {
+                    Q_ASSERT(epcIt != mEndpointHash.constEnd() || !isEndpoint);
+                    float x0 = mCoordLookup->getX(x,jw.mFirst);
+                    float x1 = mCoordLookup->getX(x,jw.mLast);
+                    float yy = mCoordLookup->getY(x,y,jw.mRoad);
+                    lines.appendHLine(x0,x1,yy);
+//                    xout << "h " << x << " " << y << " " << jw.mRoad << " " << jw.mFirst << " " << jw.mLast << "\n";
+                }
+                else
+                {
+                    float y0 = mCoordLookup->getY(x,y,jw.mFirst);
+                    float y1 = mCoordLookup->getY(x,y,jw.mLast);
+                    float xx = mCoordLookup->getX(x,jw.mRoad);
+//                    xout << "v " << x << " " << y << " " << jw.mRoad << " " << jw.mFirst << " " << jw.mLast << "\n";
+                    lines.appendVLine(xx,y0,y1);
+                }
+            }
+        }
+//        xout.flush();
     }
 
     void GraphLayouter::drawNets()
@@ -2568,30 +2612,30 @@ namespace hal
 
     void GraphLayouter::SceneCoordinate::testMinMax(int ilane)
     {
-        if (ilane  < minLane) minLane = ilane;
-        if (ilane+1> maxLane) maxLane = ilane+1;
+        if (ilane  < mMinLane) mMinLane = ilane;
+        if (ilane+1> mMaxLane) mMaxLane = ilane+1;
     }
 
     void GraphLayouter::SceneCoordinate::setOffsetX(const SceneCoordinate& previous, float maximumBlock, float sepOut, float sepInp)
     {
         float delta =  maximumBlock;
         if (delta < sepOut) delta = sepOut;
-        mOffset = previous.xBoxOffset() + (1 - minLane) * sLaneSpacing  + delta;
-        float xDefaultBoxPadding = maxLane * sLaneSpacing;
+        mOffset = previous.xBoxOffset() + (1 - mMinLane) * sLaneSpacing  + delta;
+        float xDefaultBoxPadding = mMaxLane * sLaneSpacing;
         if (xDefaultBoxPadding < sepInp)
             mPadding = sepInp - xDefaultBoxPadding;
     }
 
     void GraphLayouter::SceneCoordinate::setOffsetYje(const SceneCoordinate& previous, float minimumJunction)
     {
-        float delta = (previous.maxLane) * sLaneSpacing + sVRoadPadding;
+        float delta = (previous.mMaxLane) * sLaneSpacing + sVRoadPadding;
         if (delta < minimumJunction) delta = minimumJunction;
         mOffset = previous.mOffset + delta;
     }
 
     void GraphLayouter::SceneCoordinate::setOffsetYej(const SceneCoordinate& previous, float maximumBlock, float minimumJunction)
     {
-        float delta = (-minLane - 1) * sLaneSpacing + maximumBlock + sVRoadPadding;
+        float delta = (-mMinLane - 1) * sLaneSpacing + maximumBlock + sVRoadPadding;
         if (delta < minimumJunction) delta = minimumJunction;
         mOffset = previous.mOffset + delta;
     }
@@ -2604,6 +2648,102 @@ namespace hal
     float GraphLayouter::SceneCoordinate::xBoxOffset() const
     {
         return junctionExit() + sHRoadPadding + mPadding;
+    }
+
+    GraphLayouter::SceneCoordinateLookup::SceneCoordinateLookup(const QMap<int,SceneCoordinate>& xsc,
+                                                                const QMap<int,SceneCoordinate>& ysc)
+        : mXtable(0),
+          mYtable(0),
+          mXscene(nullptr),
+          mYscene(nullptr),
+          mXindex(nullptr),
+          mYindex(nullptr)
+    {
+        mXgrid = xsc.size();
+        mYgrid = ysc.size();
+        if (mXgrid * mYgrid <= 1) return;
+        mXindex = new JunctionIndex*[mXgrid];
+        for (int ix=0; ix<mXgrid; ix++)
+        {
+            const SceneCoordinate& sc = xsc.value(ix);
+            mXindex[ix] = new JunctionIndex;
+            mXindex[ix]->min = sc.junctionEntry();
+            mXindex[ix]->max = sc.junctionExit()+1;
+            mXindex[ix]->index = mXtable;
+            mXtable += mXindex[ix]->count();
+        }
+
+        mYindex = new JunctionIndex*[mYgrid];
+        for (int iy=0; iy<mYgrid; iy++)
+        {
+            const SceneCoordinate& sc = ysc.value(iy);
+            mYindex[iy] = new JunctionIndex;
+            mYindex[iy]->min = sc.junctionEntry();
+            mYindex[iy]->max = sc.junctionExit()+1;
+            mYindex[iy]->index = mYtable;
+            mYtable += mYindex[iy]->count();
+        }
+
+        mXscene = new float[mXtable];
+        mYscene = new float[mXgrid*mYtable];
+
+        for (int ix=0; ix<mXgrid; ix++)
+        {
+            const SceneCoordinate& sc = xsc.value(ix);
+            for (int i=mXindex[ix]->min; i<mXindex[ix]->max; i++)
+                mXscene[mXindex[ix]->index+i] = sc.lanePosition(i);
+        }
+
+        for (int iy=0; iy<mYgrid; iy++)
+        {
+            const SceneCoordinate& sc = ysc.value(iy);
+            for (int ix=0; ix<mXgrid; ix++)
+            {
+                for (int i=mYindex[iy]->min; i<mYindex[iy]->max; i++)
+                    mYscene[ix*mYtable+mYindex[iy]->index+i] = sc.lanePosition(i);
+            }
+        }
+    }
+
+    GraphLayouter::SceneCoordinateLookup::~SceneCoordinateLookup()
+    {
+ /*       if (mXscene) delete [] mXscene;
+        if (mYscene) delete [] mYscene;
+        if (mXindex)
+        {
+            for (int ix=0; ix<mXgrid; ix++)
+                delete mXindex[ix];
+            delete [] mXindex;
+        }
+        if (mYindex)
+        {
+            for (int iy=0; iy<mYgrid; iy++)
+                delete mYindex[iy];
+            delete [] mYindex;
+        }
+        */
+    }
+
+    int GraphLayouter::SceneCoordinateLookup::xIndex(int ix, int vlane) const
+    {
+        const JunctionIndex* ji = mXindex[ix];
+        return  ji->index + vlane - ji->min;
+    }
+
+    int GraphLayouter::SceneCoordinateLookup::yIndex(int ix, int iy, int hlane) const
+    {
+        const JunctionIndex* ji = mYindex[iy];
+        return  ix*mYtable + ji->index + hlane - ji->min;
+    }
+
+    float GraphLayouter::SceneCoordinateLookup::getX(int ix, int vlane) const
+    {
+        return mXscene[xIndex(ix,vlane)];
+    }
+
+    float GraphLayouter::SceneCoordinateLookup::getY(int ix, int iy, int hlane) const
+    {
+        return mYscene[yIndex(ix,iy,hlane)];
     }
 
     float GraphLayouter::EndpointCoordinate::lanePosition(int ilane, bool absolute) const
