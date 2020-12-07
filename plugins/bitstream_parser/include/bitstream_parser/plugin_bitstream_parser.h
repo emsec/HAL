@@ -2,6 +2,7 @@
 
 #include "hal_core/plugin_system/plugin_interface_cli.h"
 #include "bitstream_parser/plugin_bitstream_parser.h"
+#include "bitstream_parser/hdl_parser_bitstream.h"
 
 namespace hal
 {
@@ -26,7 +27,6 @@ namespace hal
     private:
         HDLParserBitstream::Configuration m_configuration;
         bool m_configuration_complete = false;
-
         std::unique_ptr<HDLParser> create_parser();
     };
 }    // namespace hal

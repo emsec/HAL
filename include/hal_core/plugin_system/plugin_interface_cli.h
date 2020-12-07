@@ -57,6 +57,7 @@ namespace hal
          * @param[in] args - Program options.
          * @returns True on success.
          */
+        // TODO find better name and implement here?
         virtual bool handle_pre_netlist_cli_call(ProgramArguments& args) = 0;
         
         /**

@@ -47,6 +47,7 @@ namespace hal
         {
             std::string out_path;
             std::string db_root_path;
+            std::string bitread_path;
             std::string part;
         };
 
@@ -60,8 +61,10 @@ namespace hal
          * @returns True on success, false otherwise.
          */
         bool parse(const std::filesystem::path& file_name) override;
+        std::unique_ptr<Netlist> instantiate(const GateLibrary* gl);
 
     private:
         Configuration m_config;
+        std::string m_v_path;
     };
 }    // namespace hal
