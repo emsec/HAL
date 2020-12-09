@@ -1,12 +1,10 @@
 #include "bitstream_parser/plugin_bitstream_parser.h"
 
 #include "bitstream_parser/hdl_parser_bitstream.h"
-
 #include "hal_core/netlist/hdl_parser/hdl_parser_manager.h"
 
 namespace hal
 {
-
     extern std::unique_ptr<BasePluginInterface> create_plugin_instance()
     {
         return std::make_unique<BitstreamParserPlugin>();
@@ -24,10 +22,11 @@ namespace hal
 
     void BitstreamParserPlugin::on_load()
     {
-        if (!m_configuration_complete){
-            m_configuration = {"","","",""};
+        if (!m_configuration_complete)
+        {
+            m_configuration = {"", "", "", ""};
         }
-        hdl_parser_manager::register_parser("Default Bitstream Parser", [this](){return std::make_unique<HDLParserBitstream>(m_configuration);}, {".bit"});    
+        hdl_parser_manager::register_parser("Default Bitstream Parser", [this]() { return std::make_unique<HDLParserBitstream>(m_configuration); }, {".bit"});
     }
 
     void BitstreamParserPlugin::on_unload()
@@ -50,11 +49,12 @@ namespace hal
         return true;
     }
 
-    bool BitstreamParserPlugin::handle_pre_netlist_cli_call(ProgramArguments& args){
-        UNUSED(args);        
+    bool BitstreamParserPlugin::handle_pre_netlist_cli_call(ProgramArguments& args)
+    {
+        UNUSED(args);
         m_configuration.db_root_path = "/home/sinanboecker/Dokumente/Workspace/symbiflow-xc-fasm2bels/third_party/prjxray/database";
         m_configuration.bitread_path = "/home/sinanboecker/Dokumente/Workspace/symbiflow-xc-fasm2bels/third_party/prjxray/build/tools/bitread";
-        
+
         m_configuration_complete = true;
         log_info(get_name(), "Pre netlist generation CLI handling.");
 

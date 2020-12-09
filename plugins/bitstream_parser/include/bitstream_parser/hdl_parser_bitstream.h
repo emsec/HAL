@@ -23,24 +23,16 @@
 
 #pragma once
 
-#include "bitstream_parser/hdl_parser_template.h"
 #include "hal_core/defines.h"
-#include "hal_core/netlist/module.h"
-#include "hal_core/netlist/net.h"
-#include "hal_core/plugin_system/plugin_interface_cli.h"
-#include "hal_core/utilities/token_stream.h"
-
-#include <optional>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
+#include "hal_core/netlist/hdl_parser/hdl_parser.h"
+#include "hal_core/netlist/netlist.h"
 
 namespace hal
 {
     /**
      * @ingroup hdl_parsers
      */
-    class HDL_PARSER_API HDLParserBitstream : public HDLParserTemplate<core_strings::CaseInsensitiveString>
+    class HDL_PARSER_API HDLParserBitstream : public HDLParser
     {
     public:
         struct Configuration
@@ -61,7 +53,7 @@ namespace hal
          * @returns True on success, false otherwise.
          */
         bool parse(const std::filesystem::path& file_name) override;
-        std::unique_ptr<Netlist> instantiate(const GateLibrary* gl);
+        std::unique_ptr<Netlist> instantiate(const GateLibrary* gl) override;
 
     private:
         Configuration m_config;
