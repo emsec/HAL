@@ -1,8 +1,7 @@
 #pragma once
 
-#include "hal_core/plugin_system/plugin_interface_cli.h"
-#include "bitstream_parser/plugin_bitstream_parser.h"
 #include "bitstream_parser/hdl_parser_bitstream.h"
+#include "hal_core/plugin_system/plugin_interface_cli.h"
 
 namespace hal
 {
