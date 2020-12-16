@@ -83,18 +83,19 @@ namespace hal {
                      if (w.mFirst == NetLayoutJunctionRange::sMinInf)
                      {
                          if (w.mHorizontal==0)
-                             w.mFirst = x0-1;
+                             w.mFirst = x0;
                          else
-                             w.mFirst = y0-1;
+                             w.mFirst = y0;
                      }
                      if (w.mLast == NetLayoutJunctionRange::sMaxInf)
                      {
                          if (w.mHorizontal==0)
-                             w.mLast = x1;
+                             w.mLast = x1-1;
                          else
-                             w.mLast = y1;
+                             w.mLast = y1-1;
                      }
-                     mNetsOutput[rng.netId()].addWire(w);
+                     if (w.mFirst < w.mLast)
+                        mNetsOutput[rng.netId()].addWire(w);
                  }
             }
     }

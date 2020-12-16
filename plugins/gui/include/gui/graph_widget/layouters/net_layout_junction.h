@@ -118,9 +118,9 @@ namespace hal {
         ~NetLayoutJunction() {;}
         QRect rect() const { return mRect; }
         void dump() const;
-        NetLayoutJunctionNet netById(u32 id) const { return mNetsOutput.value(id); }
         enum mErrorT {StraightRouteError = -2, CornerRouteError = -1, Ok = 0 };
         mErrorT lastError() const { return mError; }
+        QHash<u32,NetLayoutJunctionNet> mNetsOutput;
     private:
         void fourWayJunctions(QHash<u32, NetLayoutJunctionNet>::iterator& netIt);
         void routeT();
@@ -137,7 +137,6 @@ namespace hal {
         QRect mRect;
         NetLayoutJunctionEntries mEntries;
         QHash<u32,NetLayoutJunctionNet> mNetsInput;
-        QHash<u32,NetLayoutJunctionNet> mNetsOutput;
         QHash<int,NetLayoutJunctionOccupied> mOccupied[2];  // 0=horizontal, 1=vertical
         int maxRoad[2];
         mErrorT mError;

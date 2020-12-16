@@ -77,6 +77,8 @@ namespace hal
             void setOffsetX(const SceneCoordinate& previous, float maximumBlock, float sepOut, float sepInp);
             float lanePosition(int ilane) const;
             int preLanes() const { return -mMinLane; }
+            int minLane() const { return mMinLane; }
+            int maxLane() const { return mMaxLane; }
             float junctionEntry() const { return lanePosition(mMinLane); }
             float junctionExit() const { return lanePosition(mMaxLane-1); }
             float xBoxOffset() const;
@@ -145,8 +147,8 @@ namespace hal
 
             int mXgrid;
             int mYgrid;
-            int mYtable;
             int mXtable;
+            int mYtable;
             float* mXscene;
             float* mYscene;
             JunctionIndex** mXindex;
@@ -156,10 +158,12 @@ namespace hal
             int yIndex(int ix, int iy, int hlane) const;
         public:
             SceneCoordinateLookup(const QMap<int,SceneCoordinate>& xsc,
-                                  const QMap<int,SceneCoordinate>& ysc);
+                                  const QMap<int,SceneCoordinate>& ysc,
+                                  const QHash<NetLayoutPoint,EndpointCoordinate>& epHash);
             ~SceneCoordinateLookup();
             float getX(int ix, int vlane) const;
             float getY(int ix, int iy, int hlane) const;
+            void dump() const;
         };
 
         struct Road

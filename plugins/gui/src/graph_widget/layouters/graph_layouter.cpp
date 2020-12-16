@@ -1160,7 +1160,8 @@ namespace hal
     {
         // lane for given wire and net id
         QHash<u32,QHash<NetLayoutWire,int>> laneMap;
-        mCoordLookup = new SceneCoordinateLookup(mCoordX,mCoordY);
+        mCoordLookup = new SceneCoordinateLookup(mCoordX,mCoordY,mEndpointHash);
+        mCoordLookup->dump();
 
         for (auto it=mWireHash.constBegin(); it!=mWireHash.constEnd(); ++it)
         {
@@ -1442,22 +1443,25 @@ namespace hal
             int y = jt.key().y();
             bool isEndpoint = (y%2 == 0);
 
-            for (const NetLayoutJunctionWire& jw : jt.value()->netById(id).mWires)
+            auto itNetsOutput = jt.value()->mNetsOutput.find(id);
+            if (itNetsOutput == jt.value()->mNetsOutput.constEnd()) continue;  // no output nets
+            const NetLayoutJunctionNet& junctionNet = *itNetsOutput;
+            for (auto itJw = junctionNet.mWires.constBegin(); itJw != junctionNet.mWires.constEnd(); ++itJw)
             {
-                if (jw.mHorizontal==0)
+                if (itJw->mHorizontal==0)
                 {
                     Q_ASSERT(epcIt != mEndpointHash.constEnd() || !isEndpoint);
-                    float x0 = mCoordLookup->getX(x,jw.mFirst);
-                    float x1 = mCoordLookup->getX(x,jw.mLast);
-                    float yy = mCoordLookup->getY(x,y,jw.mRoad);
+                    float x0 = mCoordLookup->getX(x,itJw->mFirst);
+                    float x1 = mCoordLookup->getX(x,itJw->mLast);
+                    float yy = mCoordLookup->getY(x,y,itJw->mRoad);
                     lines.appendHLine(x0,x1,yy);
 //                    xout << "h " << x << " " << y << " " << jw.mRoad << " " << jw.mFirst << " " << jw.mLast << "\n";
                 }
                 else
                 {
-                    float y0 = mCoordLookup->getY(x,y,jw.mFirst);
-                    float y1 = mCoordLookup->getY(x,y,jw.mLast);
-                    float xx = mCoordLookup->getX(x,jw.mRoad);
+                    float y0 = mCoordLookup->getY(x,y,itJw->mFirst);
+                    float y1 = mCoordLookup->getY(x,y,itJw->mLast);
+                    float xx = mCoordLookup->getX(x,itJw->mRoad);
 //                    xout << "v " << x << " " << y << " " << jw.mRoad << " " << jw.mFirst << " " << jw.mLast << "\n";
                     lines.appendVLine(xx,y0,y1);
                 }
@@ -2651,7 +2655,8 @@ namespace hal
     }
 
     GraphLayouter::SceneCoordinateLookup::SceneCoordinateLookup(const QMap<int,SceneCoordinate>& xsc,
-                                                                const QMap<int,SceneCoordinate>& ysc)
+                                                                const QMap<int,SceneCoordinate>& ysc,
+                                                                const QHash<NetLayoutPoint, EndpointCoordinate> &epHash)
         : mXtable(0),
           mYtable(0),
           mXscene(nullptr),
@@ -2667,8 +2672,8 @@ namespace hal
         {
             const SceneCoordinate& sc = xsc.value(ix);
             mXindex[ix] = new JunctionIndex;
-            mXindex[ix]->min = sc.junctionEntry();
-            mXindex[ix]->max = sc.junctionExit()+1;
+            mXindex[ix]->min = sc.minLane();
+            mXindex[ix]->max = sc.maxLane();
             mXindex[ix]->index = mXtable;
             mXtable += mXindex[ix]->count();
         }
@@ -2678,36 +2683,57 @@ namespace hal
         {
             const SceneCoordinate& sc = ysc.value(iy);
             mYindex[iy] = new JunctionIndex;
-            mYindex[iy]->min = sc.junctionEntry();
-            mYindex[iy]->max = sc.junctionExit()+1;
+            mYindex[iy]->min = sc.minLane();
+            mYindex[iy]->max = sc.maxLane();
             mYindex[iy]->index = mYtable;
             mYtable += mYindex[iy]->count();
         }
 
         mXscene = new float[mXtable];
+        memset (mXscene, 0, mXtable*sizeof(float));
         mYscene = new float[mXgrid*mYtable];
+        memset (mYscene, 0, mXgrid*mYtable*sizeof(float));
 
         for (int ix=0; ix<mXgrid; ix++)
         {
             const SceneCoordinate& sc = xsc.value(ix);
-            for (int i=mXindex[ix]->min; i<mXindex[ix]->max; i++)
-                mXscene[mXindex[ix]->index+i] = sc.lanePosition(i);
+            for (int i=0; i<mXindex[ix]->count(); i++)
+            {
+                int inx = mXindex[ix]->index+i;
+                int ilane = mXindex[ix]->min+i;
+                if (inx < 0 || inx >= mXtable)
+                    qDebug() << "illegal X-inx" << inx << mXtable << ix << mXindex[ix]->index << i;
+                else
+                    mXscene[mXindex[ix]->index+i] = sc.lanePosition(ilane);
+            }
         }
 
         for (int iy=0; iy<mYgrid; iy++)
         {
+            bool isEndpoint = (iy % 2 == 0);
             const SceneCoordinate& sc = ysc.value(iy);
             for (int ix=0; ix<mXgrid; ix++)
             {
-                for (int i=mYindex[iy]->min; i<mYindex[iy]->max; i++)
-                    mYscene[ix*mYtable+mYindex[iy]->index+i] = sc.lanePosition(i);
+                const EndpointCoordinate& ep = epHash.value(NetLayoutPoint(ix,iy));
+                for (int i=0; i<mYindex[iy]->count(); i++)
+                {
+                    int inx = ix*mYtable+mYindex[iy]->index+i;
+                    int ilane = mYindex[iy]->min + i;
+                    if (inx < 0 || inx >= mXgrid*mYtable)
+                        qDebug() << "illegal Y-inx" << inx << mXgrid << mYtable << iy << mYindex[iy]->index << i;
+                    else
+                        if (isEndpoint)
+                            mYscene[ix*mYtable+mYindex[iy]->index+i] = ep.lanePosition(ilane,true);
+                        else
+                            mYscene[ix*mYtable+mYindex[iy]->index+i] = sc.lanePosition(ilane);
+                }
             }
         }
     }
 
     GraphLayouter::SceneCoordinateLookup::~SceneCoordinateLookup()
     {
- /*       if (mXscene) delete [] mXscene;
+        if (mXscene) delete [] mXscene;
         if (mYscene) delete [] mYscene;
         if (mXindex)
         {
@@ -2721,29 +2747,62 @@ namespace hal
                 delete mYindex[iy];
             delete [] mYindex;
         }
-        */
+    }
+
+    void GraphLayouter::SceneCoordinateLookup::dump() const
+    {
+        QTextStream xout(stdout, QIODevice::WriteOnly);
+        int ix = 0;
+        xout << "dump lookup x\n";
+        for (int i=0; i<mXtable; i++)
+        {
+            if (i >= mXindex[ix]->index)
+            {
+                xout << "\n";
+                if (ix+1 < mXgrid) ++ix;
+            }
+            xout << " " << mXscene[i];
+        }
+        int iy = 0;
+        xout << "\ndump lookup y\n";
+        for (int i=0; i<mYtable; i++)
+        {
+            if (i >= mYindex[iy]->index)
+            {
+                xout << "\n";
+                if (iy+1 < mYgrid) ++iy;
+            }
+            xout << " " << mYscene[i];
+        }
+        xout << "\n--------------\n";
     }
 
     int GraphLayouter::SceneCoordinateLookup::xIndex(int ix, int vlane) const
     {
         const JunctionIndex* ji = mXindex[ix];
+        Q_ASSERT(vlane >= ji->min && vlane < ji->max);
         return  ji->index + vlane - ji->min;
     }
 
     int GraphLayouter::SceneCoordinateLookup::yIndex(int ix, int iy, int hlane) const
     {
         const JunctionIndex* ji = mYindex[iy];
+        Q_ASSERT(hlane >= ji->min && hlane < ji->max);
         return  ix*mYtable + ji->index + hlane - ji->min;
     }
 
     float GraphLayouter::SceneCoordinateLookup::getX(int ix, int vlane) const
     {
-        return mXscene[xIndex(ix,vlane)];
+        float retval  = mXscene[xIndex(ix,vlane)];
+        Q_ASSERT(retval > 0 && fabs(retval)<100000);
+        return retval;
     }
 
     float GraphLayouter::SceneCoordinateLookup::getY(int ix, int iy, int hlane) const
     {
-        return mYscene[yIndex(ix,iy,hlane)];
+        float retval = mYscene[yIndex(ix,iy,hlane)];
+        Q_ASSERT(retval > 0 && fabs(retval)<100000);
+        return retval;
     }
 
     float GraphLayouter::EndpointCoordinate::lanePosition(int ilane, bool absolute) const
