@@ -36,10 +36,28 @@ namespace hal
          */
         std::string get_version() const override;
 
-        /** interface implementation: i_cli */
+        /**
+         * Return command line interface options.
+         *
+         * @returns The program options.
+         */
         ProgramOptions get_cli_options() const override;
 
-        /** interface implementation: i_cli */
+        /**
+         * Pass command line arguments for the initialization of the plugin.
+         *
+         * @param[in] args - Program arguments.
+         * @returns True on success, false otherwise.
+         */
+        bool handle_cli_init(ProgramArguments& args) override;
+
+        /**
+         * Entry point to handle a command line interface call.
+         *
+         * @param[in] netlist - The netlist.
+         * @param[in] args - Program arguments.
+         * @returns True on success, false otherwise.
+         */
         bool handle_cli_call(Netlist* nl, ProgramArguments& args) override;
 
         bool execute(Netlist* nl, std::string path, const u32 layer, const std::vector<u32> sizes);

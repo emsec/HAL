@@ -14,18 +14,28 @@ namespace hal
         void on_load() override;
         void on_unload() override;
 
-        /** interface implementation: i_cli */
+        /**
+         * Return command line interface options.
+         *
+         * @returns The program options.
+         */
         ProgramOptions get_cli_options() const override;
 
-        /** interface implementation: i_cli */
-        bool handle_pre_netlist_cli_call(ProgramArguments& args) override;
+        /**
+         * Pass command line arguments for the initialization of the plugin.
+         *
+         * @param[in] args - Program arguments.
+         * @returns True on success, false otherwise.
+         */
+        bool handle_cli_init(ProgramArguments& args) override;
 
-        /** interface implementation: i_cli */
+        /**
+         * Entry point to handle a command line interface call.
+         *
+         * @param[in] netlist - The netlist.
+         * @param[in] args - Program arguments.
+         * @returns True on success, false otherwise.
+         */
         bool handle_cli_call(Netlist* nl, ProgramArguments& args) override;
-
-    private:
-        HDLParserBitstream::Configuration m_configuration;
-        bool m_configuration_complete = false;
-        std::unique_ptr<HDLParser> create_parser();
     };
 }    // namespace hal

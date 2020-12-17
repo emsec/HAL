@@ -2,6 +2,7 @@
 
 #include "bitstream_parser/hdl_parser_bitstream.h"
 #include "hal_core/netlist/hdl_parser/hdl_parser_manager.h"
+#include "hal_core/utilities/log.h"
 
 namespace hal
 {
@@ -12,7 +13,7 @@ namespace hal
 
     std::string BitstreamParserPlugin::get_name() const
     {
-        return std::string("plugin_bitstream_parser");
+        return std::string("bitstream_parser");
     }
 
     std::string BitstreamParserPlugin::get_version() const
@@ -22,11 +23,6 @@ namespace hal
 
     void BitstreamParserPlugin::on_load()
     {
-        if (!m_configuration_complete)
-        {
-            m_configuration = {"", "", "", ""};
-        }
-        hdl_parser_manager::register_parser("Default Bitstream Parser", [this]() { return std::make_unique<HDLParserBitstream>(m_configuration); }, {".bit"});
     }
 
     void BitstreamParserPlugin::on_unload()
@@ -42,22 +38,25 @@ namespace hal
         return description;
     }
 
+    bool BitstreamParserPlugin::handle_cli_init(ProgramArguments& args)
+    {
+        // TODO read from command line
+        // TODO major reqrite of plugin system: load should not be executed before this part has been
+        std::filesystem::path output_path   = "";
+        std::filesystem::path database_path = "";
+        std::filesystem::path bitread_path  = "";
+
+        HDLParserBitstream parser(output_path, database_path, bitread_path, "");
+
+        hdl_parser_manager::register_parser("Default Bitstream Parser", [parser]() { return std::make_unique<HDLParserBitstream>(parser); }, {".bit"});
+
+        return true;
+    }
+
     bool BitstreamParserPlugin::handle_cli_call(Netlist* nl, ProgramArguments& args)
     {
         UNUSED(nl);
         UNUSED(args);
-        return true;
-    }
-
-    bool BitstreamParserPlugin::handle_pre_netlist_cli_call(ProgramArguments& args)
-    {
-        UNUSED(args);
-        m_configuration.db_root_path = "/home/sinanboecker/Dokumente/Workspace/symbiflow-xc-fasm2bels/third_party/prjxray/database";
-        m_configuration.bitread_path = "/home/sinanboecker/Dokumente/Workspace/symbiflow-xc-fasm2bels/third_party/prjxray/build/tools/bitread";
-
-        m_configuration_complete = true;
-        log_info(get_name(), "Pre netlist generation CLI handling.");
-
         return true;
     }
 }    // namespace hal

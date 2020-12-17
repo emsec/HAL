@@ -27,6 +27,8 @@
 #include "hal_core/netlist/hdl_parser/hdl_parser.h"
 #include "hal_core/netlist/netlist.h"
 
+#include <filesystem>
+
 namespace hal
 {
     /**
@@ -35,28 +37,26 @@ namespace hal
     class HDL_PARSER_API HDLParserBitstream : public HDLParser
     {
     public:
-        struct Configuration
-        {
-            std::string out_path;
-            std::string db_root_path;
-            std::string bitread_path;
-            std::string part;
-        };
-
-        HDLParserBitstream(const Configuration& config);
+        HDLParserBitstream(std::filesystem::path output_path, std::filesystem::path database_path, std::filesystem::path bitread_path, const std::string& part);
         ~HDLParserBitstream() = default;
 
         /**
-         * Parses a Xilinx bitstream file to netlist and then into an intermediate format.
+         * Parses a Xilinx 7-series bitstream file into a netlist and then into HAL.
          *
          * @param[in] file_name - The file to parse.
          * @returns True on success, false otherwise.
          */
         bool parse(const std::filesystem::path& file_name) override;
+
         std::unique_ptr<Netlist> instantiate(const GateLibrary* gl) override;
 
     private:
-        Configuration m_config;
-        std::string m_v_path;
+        std::filesystem::path m_output_path;
+        std::filesystem::path m_database_path;
+        std::filesystem::path m_bitread_path;
+        std::filesystem::path m_verilog_path;
+        std::string m_part;
+        std::string m_io_standard = "LVCMOS33";
+        std::string m_io_drive    = "16";
     };
 }    // namespace hal

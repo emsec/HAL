@@ -45,27 +45,26 @@ namespace hal
         virtual ~CLIPluginInterface() = default;
 
         /**
-         * Returns command line interface options
+         * Return command line interface options.
          *
-         * @returns The program options description.
+         * @returns The program options.
          */
         virtual ProgramOptions get_cli_options() const = 0;
 
         /**
-         * Entry point to handle command line interface call before netlist is available
+         * Pass command line arguments for the initialization of the plugin.
          *
-         * @param[in] args - Program options.
-         * @returns True on success.
+         * @param[in] args - Program arguments.
+         * @returns True on success, false otherwise.
          */
-        // TODO find better name and implement here?
-        virtual bool handle_pre_netlist_cli_call(ProgramArguments& args) = 0;
-        
+        virtual bool handle_cli_init(ProgramArguments& args) = 0;
+
         /**
-         * Entry point to handle command line interface call
+         * Entry point to handle a command line interface call.
          *
          * @param[in] netlist - The netlist.
-         * @param[in] args - Program options.
-         * @returns True on success.
+         * @param[in] args - Program arguments.
+         * @returns True on success, false otherwise.
          */
         virtual bool handle_cli_call(Netlist* netlist, ProgramArguments& args) = 0;
     };

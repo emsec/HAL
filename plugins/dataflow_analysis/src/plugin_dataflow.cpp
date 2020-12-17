@@ -63,6 +63,12 @@ namespace hal
         return description;
     }
 
+    bool handle_cli_init(ProgramArguments& args)
+    {
+        UNUSED(args);
+        return true;
+    }
+
     bool plugin_dataflow::handle_cli_call(Netlist* nl, ProgramArguments& args)
     {
         UNUSED(args);

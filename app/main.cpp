@@ -206,7 +206,6 @@ int main(int argc, const char* argv[])
     /**
      * control for command line interface
      */
-
     if (args.is_option_set("--show-log-options"))
     {
         std::cout << lm.get_option_descriptions().get_options_string() << std::endl;
@@ -264,8 +263,6 @@ int main(int argc, const char* argv[])
         }
     }
 
-    //TODO call handle_pre_netlist_cli_call
-    bool pre_netlist_plugins_successful = true;
     for (const auto& plugin_name : plugins_to_execute)
     {
         auto plugin = plugin_manager::get_plugin_instance<CLIPluginInterface>(plugin_name);
@@ -292,18 +289,11 @@ int main(int argc, const char* argv[])
             log_info("core", "  '{}': {}", option, utils::join(",", plugin_args.get_parameters(option)));
         }
 
-        if (!plugin->handle_pre_netlist_cli_call(plugin_args))
+        if (!plugin->handle_cli_init(plugin_args))
         {
-            pre_netlist_plugins_successful = false;
-            break;
+            return cleanup(ERROR);
         }
     }
-
-    if (!pre_netlist_plugins_successful)
-    {
-        return cleanup(ERROR);
-    }
-
 
     std::unique_ptr<Netlist> netlist;
 
