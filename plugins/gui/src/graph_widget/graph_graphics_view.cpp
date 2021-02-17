@@ -516,10 +516,110 @@ namespace hal
         }
     }
 
+    void GraphGraphicsView::handleNodeMove(u32 direction) {
+
+        auto context            = mGraphWidget->getContext();
+        GraphLayouter* layouter = context->debugGetLayouter();
+        QMap<QPoint,Node> nodeMap = layouter->positionToNodeMap();
+        Node nodeToMove;
+        QPoint sourceLayouterPos;
+
+        if (gSelectionRelay->mSelectedGates.size() == 1 && gSelectionRelay->mSelectedModules.size() == 0)
+        {
+            // take the selected gate
+            u32 id = *gSelectionRelay->mSelectedGates.begin();
+            for (QMap<QPoint,Node>::iterator it = nodeMap.begin(); it != nodeMap.end(); ++it)
+            {
+                if (it.value().type() == Node::Gate && it.value().id() == id) {
+                    sourceLayouterPos = it.key();
+                    nodeToMove = it.value();
+                    break;
+                }
+            }
+        }
+        else if (gSelectionRelay->mSelectedGates.size() == 0 && gSelectionRelay->mSelectedModules.size() == 1)
+        {
+            // take the selected module
+            u32 id = *gSelectionRelay->mSelectedModules.begin();
+            for (QMap<QPoint,Node>::iterator it = nodeMap.begin(); it != nodeMap.end(); ++it)
+            {
+                if (it.value().type() == Node::Module && it.value().id() == id) {
+                    sourceLayouterPos = it.key();
+                    nodeToMove = it.value();
+                    break;
+                }
+            }
+        }
+        else
+        {
+            // only able to move one node at a time
+            return;
+        }
+
+        QPoint targetLayouterPos = sourceLayouterPos;
+        do {
+            switch (direction)
+            {
+                case 0:
+                // right
+                targetLayouterPos.rx()++;
+                break;
+
+                case 1:
+                // down
+                targetLayouterPos.ry()++;
+                break;
+
+                case 2:
+                // left
+                targetLayouterPos.rx()--;
+                break;
+
+                case 3:
+                // up
+                targetLayouterPos.ry()--;
+                break;
+
+                default:
+                return;
+            }
+        } while (!nodeMap.value(targetLayouterPos).isNull());
+
+        qDebug() << "Move Gate/Module with ID " << nodeToMove.id() << " from " << sourceLayouterPos.x() << "," << sourceLayouterPos.y() << " to " << targetLayouterPos.x() << "," << targetLayouterPos.y();
+        layouter->setNodePosition(nodeToMove, targetLayouterPos);
+
+        // re-layout the nets
+        context->scheduleSceneUpdate();
+    }
+
     void GraphGraphicsView::keyPressEvent(QKeyEvent* event)
     {
         switch (event->key())
         {
+            case Qt::Key_Right:
+            if (event->modifiers() & Qt::ControlModifier) {
+                handleNodeMove(0);
+            }
+            break;
+
+            case Qt::Key_Down:
+            if (event->modifiers() & Qt::ControlModifier) {
+                handleNodeMove(1);
+            }
+            break;
+
+            case Qt::Key_Left:
+            if (event->modifiers() & Qt::ControlModifier) {
+                handleNodeMove(2);
+            }
+            break;
+
+            case Qt::Key_Up:
+            if (event->modifiers() & Qt::ControlModifier) {
+                handleNodeMove(3);
+            }
+            break;
+             
             case Qt::Key_Space: {
                 //qDebug() << "Space pressed";
             }
