@@ -119,6 +119,10 @@ namespace hal
         if (mContext->sceneUpdateInProgress())
             return;
 
+        if (event->modifiers() & Qt::ControlModifier)
+        {
+            return;
+        }
         switch (event->key())
         {
             case Qt::Key_Left:

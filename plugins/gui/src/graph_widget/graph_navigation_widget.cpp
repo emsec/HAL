@@ -21,6 +21,9 @@ namespace hal
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return || (event->key() == Qt::Key_Right && mNavigationWidget->direction() == SelectionRelay::Subfocus::Right)
             || (event->key() == Qt::Key_Left && mNavigationWidget->direction() == SelectionRelay::Subfocus::Left))
         {
+            if (event->modifiers() & Qt::ControlModifier) {
+                return;
+            }
             Q_EMIT cellDoubleClicked(currentRow(), 0);
             return;
         }
@@ -28,6 +31,9 @@ namespace hal
         if (event->key() == Qt::Key_Escape || (event->key() == Qt::Key_Left && mNavigationWidget->direction() == SelectionRelay::Subfocus::Right)
             || (event->key() == Qt::Key_Right && mNavigationWidget->direction() == SelectionRelay::Subfocus::Left))
         {
+            if (event->modifiers() & Qt::ControlModifier) {
+                return;
+            }
             mNavigationWidget->closeRequest();
             return;
         }
