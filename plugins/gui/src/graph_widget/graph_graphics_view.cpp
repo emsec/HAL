@@ -603,6 +603,8 @@ namespace hal
 
         // re-layout the nets
         context->scheduleSceneUpdate();
+        
+        //    Q_EMIT navigationRequested();
     }
 
     void GraphGraphicsView::keyPressEvent(QKeyEvent* event)
