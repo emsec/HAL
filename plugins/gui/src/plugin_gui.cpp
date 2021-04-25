@@ -67,7 +67,7 @@ namespace hal
     {
         if (args.is_option_set("--input-file"))
         {
-            auto fileName = std::filesystem::path(args.get_parameter("--input-file"));
+            auto fileName = std::experimental::filesystem::path(args.get_parameter("--input-file"));
             log_info("gui", "GUI started with file {}.", fileName.string());
             FileManager::get_instance()->openFile(QString::fromStdString(fileName.string()));
         }

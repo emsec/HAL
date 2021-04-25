@@ -29,7 +29,7 @@
 #include "hal_core/netlist/gate_library/gate_type.h"
 #include "hal_core/utilities/token_stream.h"
 
-#include <filesystem>
+#include <experimental/filesystem>
 #include <map>
 #include <optional>
 #include <unordered_map>
@@ -61,7 +61,7 @@ namespace hal
          * @param[in] file_path - Path to the file containing the gate library definition.
          * @returns The gate library or a nullptr on error.
          */
-        std::unique_ptr<GateLibrary> parse(const std::filesystem::path& file_path) override;
+        std::unique_ptr<GateLibrary> parse(const std::experimental::filesystem::path& file_path) override;
 
     private:
         struct type_group
@@ -145,7 +145,7 @@ namespace hal
 
         std::unique_ptr<GateLibrary> m_gate_lib;
         std::stringstream m_fs;
-        std::filesystem::path m_path;
+        std::experimental::filesystem::path m_path;
 
         TokenStream<std::string> m_token_stream;
         std::map<std::string, type_group> m_bus_types;

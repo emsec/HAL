@@ -41,7 +41,7 @@ namespace hal
             ProgramOptions m_plugin_options("plugin options");
 
             // stores the plugin folder
-            std::vector<std::filesystem::path> m_plugin_folders = utils::get_plugin_directories();
+            std::vector<std::experimental::filesystem::path> m_plugin_folders = utils::get_plugin_directories();
 
             bool solve_dependencies(std::string plugin_name, std::set<std::string> dep_file_name)
             {
@@ -57,14 +57,14 @@ namespace hal
                 }
                 for (const auto& file_name : dep_file_name)
                 {
-                    auto dep_plugin_name        = std::filesystem::path(file_name).stem().string();
+                    auto dep_plugin_name        = std::experimental::filesystem::path(file_name).stem().string();
                     auto dep_file_name_with_ext = file_name + "." + LIBRARY_FILE_EXTENSION;
 
                     if (m_loaded_plugins.find(dep_plugin_name) != m_loaded_plugins.end())
                     {
                         continue;
                     }
-                    std::filesystem::path file_path = utils::get_file(dep_file_name_with_ext, m_plugin_folders);
+                    std::experimental::filesystem::path file_path = utils::get_file(dep_file_name_with_ext, m_plugin_folders);
                     if (file_path == "" || !load(dep_plugin_name, file_path))
                     {
                         log_error("core", "cannot solve dependency '{}' for plugin '{}'", dep_plugin_name, plugin_name);
@@ -77,7 +77,7 @@ namespace hal
                 return true;
             }
 
-            bool has_valid_file_extension(std::filesystem::path file_name)
+            bool has_valid_file_extension(std::experimental::filesystem::path file_name)
             {
 #if defined(__APPLE__) && defined(__MACH__)
                 if (utils::ends_with(file_name.string(), std::string(".so")))
@@ -116,19 +116,19 @@ namespace hal
             return m_plugin_options;
         }
 
-        bool load_all_plugins(const std::vector<std::filesystem::path>& directory_names)
+        bool load_all_plugins(const std::vector<std::experimental::filesystem::path>& directory_names)
         {
             auto directories = (!directory_names.empty()) ? directory_names : m_plugin_folders;
             for (const auto& directory : directories)
             {
-                if (!std::filesystem::exists(directory))
+                if (!std::experimental::filesystem::exists(directory))
                 {
                     continue;
                 }
                 u32 num_of_loaded_plugins = 0;
                 for (const auto& file : utils::DirectoryRange(directory))
                 {
-                    if (!has_valid_file_extension(file) || std::filesystem::is_directory(file))
+                    if (!has_valid_file_extension(file) || std::experimental::filesystem::is_directory(file))
                         continue;
 
                     auto plugin_name = file.path().stem().string();
@@ -142,7 +142,7 @@ namespace hal
             return true;
         }
 
-        bool load(const std::string& plugin_name, const std::filesystem::path& file_name)
+        bool load(const std::string& plugin_name, const std::experimental::filesystem::path& file_name)
         {
             log_info("core", "loading plugin '{}'...", file_name.string());
             if (plugin_name.empty())

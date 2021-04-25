@@ -31,7 +31,7 @@ namespace hal
             return (bool)ifile;
         }
 
-        bool folder_exists_and_is_accessible(const std::filesystem::path& folder)
+        bool folder_exists_and_is_accessible(const std::experimental::filesystem::path& folder)
         {
 #ifdef _WIN32
             DWORD ftyp = GetFileAttributesA(folder.c_str());
@@ -58,14 +58,14 @@ namespace hal
 #endif
         }
 
-        std::filesystem::path get_binary_directory()
+        std::experimental::filesystem::path get_binary_directory()
         {
             char buf[1024] = {0};
 #ifdef _WIN32
             DWORD ret = GetModuleFileNameA(NULL, buf, sizeof(buf));
             if (ret == 0 || ret == sizeof(buf))
                 return std::string();
-            return std::filesystem::path(buf);
+            return std::experimental::filesystem::path(buf);
 #elif __APPLE__ && __MACH__
             uint32_t size = sizeof(buf);
             int ret       = _NSGetExecutablePath(buf, &size);
@@ -75,29 +75,29 @@ namespace hal
             }
 
             hal::error_code ec;
-            std::filesystem::path p(std::filesystem::canonical(buf, ec));
+            std::experimental::filesystem::path p(std::experimental::filesystem::canonical(buf, ec));
             return p.parent_path().make_preferred();
 #elif __linux__
             ssize_t size = readlink("/proc/self/exe", buf, sizeof(buf));
             std::string path(buf, size);
             hal::error_code ec;
-            auto p = std::filesystem::canonical(path, ec);
+            auto p = std::experimental::filesystem::canonical(path, ec);
             return p.make_preferred().parent_path();
 #endif
         }
 
-        std::filesystem::path get_base_directory()
+        std::experimental::filesystem::path get_base_directory()
         {
             auto environ_path = std::getenv("HAL_BASE_PATH");
             if (environ_path)
             {
-                return std::filesystem::path(environ_path).make_preferred();
+                return std::experimental::filesystem::path(environ_path).make_preferred();
             }
             hal::error_code ec;
             auto bin_dir = get_binary_directory();
-            while (std::filesystem::exists(bin_dir))
+            while (std::experimental::filesystem::exists(bin_dir))
             {
-                if (std::filesystem::exists(bin_dir / "hal", ec))
+                if (std::experimental::filesystem::exists(bin_dir / "hal", ec))
                 {
                     return bin_dir.parent_path();
                 }
@@ -107,7 +107,7 @@ namespace hal
                 }
                 bin_dir = bin_dir.parent_path();
             }
-            std::filesystem::path which_result = which("hal");
+            std::experimental::filesystem::path which_result = which("hal");
             if (!which_result.empty())
             {
                 return which_result.parent_path().parent_path();
@@ -115,9 +115,9 @@ namespace hal
             die("core", "Cannot determine base path of hal installation. Please set the environment variable HAL_BASE_PATH. Giving up!");
         }
 
-        std::filesystem::path get_library_directory()
+        std::experimental::filesystem::path get_library_directory()
         {
-            std::vector<std::filesystem::path> path_hints = {
+            std::vector<std::experimental::filesystem::path> path_hints = {
                 get_base_directory() / "lib/x86_64-linux-gnu",
                 get_base_directory() / "lib64/",
                 get_base_directory() / "lib/",
@@ -126,114 +126,114 @@ namespace hal
             for (const auto& path : path_hints)
             {
                 hal::error_code ec;
-                if (std::filesystem::exists(path / "hal_plugins", ec))
+                if (std::experimental::filesystem::exists(path / "hal_plugins", ec))
                 {
                     return path;
                 }
             }
 
-            return std::filesystem::path();
+            return std::experimental::filesystem::path();
         }
 
-        std::filesystem::path get_share_directory()
+        std::experimental::filesystem::path get_share_directory()
         {
-            std::vector<std::filesystem::path> path_hints = {
+            std::vector<std::experimental::filesystem::path> path_hints = {
                 get_base_directory() / "share/hal",
             };
             return get_first_directory_exists(path_hints);
         }
 
-        std::filesystem::path get_user_share_directory()
+        std::experimental::filesystem::path get_user_share_directory()
         {
-            std::filesystem::path dir = std::filesystem::path(getenv("HOME")) / ".local/share/hal";
-            std::filesystem::create_directories(dir);
+            std::experimental::filesystem::path dir = std::experimental::filesystem::path(getenv("HOME")) / ".local/share/hal";
+            std::experimental::filesystem::create_directories(dir);
             return dir;
         }
 
-        std::filesystem::path get_config_directory()
+        std::experimental::filesystem::path get_config_directory()
         {
-            std::vector<std::filesystem::path> path_hints = {
+            std::vector<std::experimental::filesystem::path> path_hints = {
                 get_base_directory() / "share/hal/defaults",
             };
             return get_first_directory_exists(path_hints);
         }
 
-        std::filesystem::path get_user_config_directory()
+        std::experimental::filesystem::path get_user_config_directory()
         {
-            std::filesystem::path dir = std::filesystem::path(getenv("HOME")) / ".config/hal";
-            std::filesystem::create_directories(dir);
+            std::experimental::filesystem::path dir = std::experimental::filesystem::path(getenv("HOME")) / ".config/hal";
+            std::experimental::filesystem::create_directories(dir);
             return dir;
         }
 
-        std::filesystem::path get_default_log_directory(std::filesystem::path source_file)
+        std::experimental::filesystem::path get_default_log_directory(std::experimental::filesystem::path source_file)
         {
-            std::filesystem::path dir = (source_file.empty()) ? get_user_share_directory() / "log" : source_file.parent_path();
-            std::filesystem::create_directories(dir);
+            std::experimental::filesystem::path dir = (source_file.empty()) ? get_user_share_directory() / "log" : source_file.parent_path();
+            std::experimental::filesystem::create_directories(dir);
             return dir;
         }
 
-        std::vector<std::filesystem::path> get_gate_library_directories()
+        std::vector<std::experimental::filesystem::path> get_gate_library_directories()
         {
-            std::vector<std::filesystem::path> path_hints = {
+            std::vector<std::experimental::filesystem::path> path_hints = {
                 get_share_directory() / "gate_libraries",
                 get_user_share_directory() / "gate_libraries",
             };
             return path_hints;
         }
 
-        std::vector<std::filesystem::path> get_plugin_directories()
+        std::vector<std::experimental::filesystem::path> get_plugin_directories()
         {
-            std::vector<std::filesystem::path> path_hints = {
+            std::vector<std::experimental::filesystem::path> path_hints = {
 
                 get_library_directory() / "hal_plugins/",
                 get_library_directory() / "plugins/",
                 get_user_share_directory() / "plugins/",
-                std::filesystem::path(getenv("HOME")) / "plugins/",
+                std::experimental::filesystem::path(getenv("HOME")) / "plugins/",
             };
             return path_hints;
         }
 
-        std::filesystem::path get_first_directory_exists(std::vector<std::filesystem::path> path_hints)
+        std::experimental::filesystem::path get_first_directory_exists(std::vector<std::experimental::filesystem::path> path_hints)
         {
             for (const auto& path : path_hints)
             {
                 hal::error_code ec;
-                if (std::filesystem::exists(path, ec))
+                if (std::experimental::filesystem::exists(path, ec))
                 {
                     return path;
                 }
             }
-            return std::filesystem::path();
+            return std::experimental::filesystem::path();
         }
 
-        std::filesystem::path get_file(std::string file_name, std::vector<std::filesystem::path> path_hints)
+        std::experimental::filesystem::path get_file(std::string file_name, std::vector<std::experimental::filesystem::path> path_hints)
         {
             if (file_name.empty())
             {
-                return std::filesystem::path();
+                return std::experimental::filesystem::path();
             }
 
             for (const auto& path : path_hints)
             {
                 hal::error_code ec1;
-                if (std::filesystem::exists(std::filesystem::path(path), ec1))
+                if (std::experimental::filesystem::exists(std::experimental::filesystem::path(path), ec1))
                 {
-                    std::filesystem::path file_path = std::filesystem::path(path).string() + "/" + std::filesystem::path(file_name).string();
+                    std::experimental::filesystem::path file_path = std::experimental::filesystem::path(path).string() + "/" + std::experimental::filesystem::path(file_name).string();
                     hal::error_code ec2;
-                    if (std::filesystem::exists(file_path, ec2))
+                    if (std::experimental::filesystem::exists(file_path, ec2))
                     {
                         return file_path;
                     }
                 }
             }
-            return std::filesystem::path();
+            return std::experimental::filesystem::path();
         }
 
-        std::filesystem::path which(const std::string& name, const std::string& path)
+        std::experimental::filesystem::path which(const std::string& name, const std::string& path)
         {
             if (name.empty())
             {
-                return std::filesystem::path();
+                return std::experimental::filesystem::path();
             }
             std::string internal_path = path;
             if (internal_path.empty())
@@ -242,7 +242,7 @@ namespace hal
             }
 #ifdef _WIN32
             const char which_delimiter = ';';
-            return std::filesystem::path();    // Curerently no support for windows. Sorry ...
+            return std::experimental::filesystem::path();    // Curerently no support for windows. Sorry ...
 #else
             const char which_delimiter = ':';
 #endif
@@ -251,7 +251,7 @@ namespace hal
             {
                 hal::error_code ec;
                 UNUSED(ec);
-                std::filesystem::path p = std::filesystem::path(folder) / name;
+                std::experimental::filesystem::path p = std::experimental::filesystem::path(folder) / name;
                 struct stat sb;
 
                 if (stat(p.c_str(), &sb) == 0 && sb.st_mode & S_IXUSR)
@@ -259,7 +259,7 @@ namespace hal
                     return p;
                 }
             }
-            return std::filesystem::path();
+            return std::experimental::filesystem::path();
         }
 
         std::string get_open_source_licenses()

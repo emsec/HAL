@@ -17,7 +17,7 @@ namespace hal
             std::unordered_map<std::string, std::vector<std::string>> m_writer_to_extensions;
             std::unordered_map<std::string, std::pair<std::string, WriterFactory>> m_extension_to_writer;
 
-            WriterFactory get_writer_factory_for_file(const std::filesystem::path& file_name)
+            WriterFactory get_writer_factory_for_file(const std::experimental::filesystem::path& file_name)
             {
                 auto extension = utils::to_lower(file_name.extension().string());
                 if (!extension.empty() && extension[0] != '.')
@@ -73,7 +73,7 @@ namespace hal
             }
         }
 
-        bool write(GateLibrary* gate_lib, const std::filesystem::path& file_path)
+        bool write(GateLibrary* gate_lib, const std::experimental::filesystem::path& file_path)
         {
             auto factory = get_writer_factory_for_file(file_path);
             if (!factory)

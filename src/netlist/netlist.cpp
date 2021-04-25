@@ -42,12 +42,12 @@ namespace hal
         }
     }
 
-    std::filesystem::path Netlist::get_input_filename() const
+    std::experimental::filesystem::path Netlist::get_input_filename() const
     {
         return m_file_name;
     }
 
-    void Netlist::set_input_filename(const std::filesystem::path& input_filename)
+    void Netlist::set_input_filename(const std::experimental::filesystem::path& input_filename)
     {
         if (input_filename != m_file_name)
         {

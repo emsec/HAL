@@ -2,7 +2,7 @@
 
 #include "hal_core/defines.h"
 
-#include <filesystem>
+#include <experimental/filesystem>
 #include <functional>
 
 namespace hal
@@ -44,6 +44,6 @@ namespace hal
          * @param[in] file_path - The output path.
          * @returns True on success, false otherwise.
          */
-        NETLIST_API bool write(GateLibrary* gate_lib, const std::filesystem::path& file_path);
+        NETLIST_API bool write(GateLibrary* gate_lib, const std::experimental::filesystem::path& file_path);
     }    // namespace gate_library_writer_manager
 }    // namespace hal

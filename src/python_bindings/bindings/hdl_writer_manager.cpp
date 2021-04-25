@@ -13,7 +13,7 @@ namespace hal
                 :rtype: list(list(str, list(str), set(str)))
                 )")
             .def("write",
-                 py::overload_cast<Netlist*, const std::filesystem::path&>(&hdl_writer_manager::write),
+                 py::overload_cast<Netlist*, const std::experimental::filesystem::path&>(&hdl_writer_manager::write),
                  py::arg("netlist"),
                  py::arg("file_name"),
                  R"(

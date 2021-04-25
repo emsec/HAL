@@ -10,7 +10,7 @@ namespace hal
 
         py_gate_library_manager.def(
             "load",
-            [](std::filesystem::path file_path, bool reload) { return RawPtrWrapper<GateLibrary>(gate_library_manager::load(file_path, reload)); },
+            [](std::experimental::filesystem::path file_path, bool reload) { return RawPtrWrapper<GateLibrary>(gate_library_manager::load(file_path, reload)); },
             py::arg("file_path"),
             py::arg("reload") = false,
             R"(

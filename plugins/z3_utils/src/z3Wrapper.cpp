@@ -8,8 +8,9 @@
 #include "hal_core/utilities/log.h"
 
 #include <array>
-#include <filesystem>
+#include <experimental/filesystem>
 #include <fstream>
+#include <sstream>
 #include <memory>
 #include <omp.h>
 #include <stdlib.h>
@@ -18,6 +19,13 @@ namespace hal
 {
     namespace z3_utils
     {
+        std::string z3toString(const z3::ast& a)
+        {
+            std::ostringstream s;
+            s << a;
+            return s.str();
+        }
+
         z3Wrapper::z3Wrapper(std::unique_ptr<z3::context> ctx, std::unique_ptr<z3::expr> expr) : m_z3_wrapper_id(create_id()), m_ctx(std::move(ctx)), m_expr(std::move(expr))
         {
             this->extract_function_inputs();
@@ -39,13 +47,13 @@ namespace hal
             std::string y_function = base_path + std::to_string(other.m_z3_wrapper_id) + ".v";
 
             std::string compare_dir = base_path + "compare_" + std::to_string(m_z3_wrapper_id) + "_" + std::to_string(other.m_z3_wrapper_id);
-            std::filesystem::create_directory(compare_dir);
+            std::experimental::filesystem::create_directory(compare_dir);
 
             std::string command = "cd " + compare_dir + " && timeout --kill-after=66s 60s abc -c \"bm " + x_function + " " + y_function + "\" > " + compare_dir + "/output.txt 2>&1";
             int status          = system(command.c_str());
 
             // check if functions match
-            if (std::filesystem::exists(compare_dir + "/IOmatch.txt"))
+            if (std::experimental::filesystem::exists(compare_dir + "/IOmatch.txt"))
             {
                 functions_are_equal = true;
             }
@@ -55,7 +63,7 @@ namespace hal
                 log_info("z3_utils", "timeout, trying fallback");
                 functions_are_equal = oldeq(other);
             }
-            std::filesystem::remove_all(compare_dir);
+            std::experimental::filesystem::remove_all(compare_dir);
 
             return functions_are_equal;
         }
@@ -140,7 +148,7 @@ namespace hal
                     z3::expr value_constraint = x_expr == y_expr;
                     z3::expr id_constraint    = x_id_expr == y_id_val;
 
-                    if (n_expr.to_string() == "null")
+                    if (z3toString(n_expr) == "null")
                     {
                         n_expr = (value_constraint && id_constraint);
                     }
@@ -150,7 +158,7 @@ namespace hal
                     }
                 }
 
-                if (constraint_expr.to_string() == "null")
+                if (z3toString(constraint_expr) == "null")
                 {
                     constraint_expr = n_expr;
                 }
@@ -159,7 +167,7 @@ namespace hal
                     constraint_expr = constraint_expr && n_expr;
                 }
 
-                if (x_vals.to_string() == "null")
+                if (z3toString(x_vals) == "null")
                 {
                     x_vals = x_expr;
                 }
@@ -263,8 +271,9 @@ namespace hal
                 z3::model m1 = s.get_model();
 
                 // std::cout << "Mapping: " << std::endl;
-                for (const auto& x_i : x_ids)
+                for (unsigned int inx=0; inx<x_ids.size(); inx++)
                 {
+                    const z3::expr& x_i = x_ids[inx];
                     found_mapping.push_back({x_i, m1.eval(x_i)});
                     // std::cout << x_i << ": " << m1.eval(x_i) << std::endl;
                 }
@@ -299,7 +308,7 @@ namespace hal
                 z3::expr forbidden_mapping(comp_ctx);
                 for (const auto& p : found_mapping)
                 {
-                    if (forbidden_mapping.to_string() == "null")
+                    if (z3toString(forbidden_mapping) == "null")
                     {
                         forbidden_mapping = p.first != p.second;
                     }
@@ -325,9 +334,19 @@ namespace hal
             return m_z3_wrapper_id;
         }
 
+        z3::expr_vector z3ParseString(z3::context &ctx, char const* s)
+        {
+            Z3_ast r = Z3_parse_smtlib2_string(ctx, s, 0, 0, 0, 0, 0, 0);
+//            check_error();
+            z3::expr e(ctx,r);
+            z3::expr_vector retval(ctx);
+            retval.push_back(e);
+            return retval;
+        }
+
         z3::expr z3Wrapper::get_expr_in_ctx(z3::context& ctx) const
         {
-            auto expr_vec = ctx.parse_string(get_smt2_string().c_str());
+            auto expr_vec = z3ParseString(ctx,get_smt2_string().c_str());
             return expr_vec.back().arg(0).simplify();
         }
 
@@ -422,7 +441,7 @@ namespace hal
 
             // compile the c file
             std::string directory = "/tmp/boolean_influence_tmp/";
-            std::filesystem::create_directory(directory);
+            std::experimental::filesystem::create_directory(directory);
 
             log_debug("z3_utils", "directory created");
 
@@ -479,7 +498,7 @@ namespace hal
             std::remove(filename.c_str());
             std::remove(program_name.c_str());
 
-            //std::filesystem::remove(directory);
+            //std::experimental::filesystem::remove(directory);
 
             log_debug("z3_utils", "returning influences");
 
@@ -493,7 +512,7 @@ namespace hal
             return s.to_smt2();
         }
 
-        bool z3Wrapper::write_verilog_file(const std::filesystem::path& path) const
+        bool z3Wrapper::write_verilog_file(const std::experimental::filesystem::path& path) const
         {
             // Convert z3 expr to boolean function in verilog
             auto converter    = VerilogConverter();
@@ -513,7 +532,7 @@ namespace hal
             return true;
         }
 
-        bool z3Wrapper::write_c_file(const std::filesystem::path& path) const
+        bool z3Wrapper::write_c_file(const std::experimental::filesystem::path& path) const
         {
             // Convert z3 expr to boolean function in c
             const auto converter = Cpp_Converter();

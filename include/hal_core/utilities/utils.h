@@ -472,7 +472,7 @@ namespace hal
          * @param[in] path - The directory to check.
          * @returns True if \p path exists and is accessible, false otherwise.
          */
-        CORE_API bool folder_exists_and_is_accessible(const std::filesystem::path& path);
+        CORE_API bool folder_exists_and_is_accessible(const std::experimental::filesystem::path& path);
 
         /**
          * Locate an executable in the given path environment.
@@ -481,14 +481,14 @@ namespace hal
          * @param[in] path - The search path (defaults to PATH environment variable).
          * @returns The path if an executable is found, an empty path otherwise.
          */
-        CORE_API std::filesystem::path which(const std::string& name, const std::string& path = "");
+        CORE_API std::experimental::filesystem::path which(const std::string& name, const std::string& path = "");
 
         /**
          * Get the path to the executable of HAL.
          *
          * @returns The path.
          */
-        CORE_API std::filesystem::path get_binary_directory();
+        CORE_API std::experimental::filesystem::path get_binary_directory();
 
         /**
          * Get the base path to the HAL installation.<br>
@@ -498,7 +498,7 @@ namespace hal
          *
          * @returns The path.
          */
-        CORE_API std::filesystem::path get_base_directory();
+        CORE_API std::experimental::filesystem::path get_base_directory();
 
         /**
          * Get the path to the shared and static libraries of HAL.<br>
@@ -506,7 +506,7 @@ namespace hal
          *
          * @returns The path.
          */
-        CORE_API std::filesystem::path get_library_directory();
+        CORE_API std::experimental::filesystem::path get_library_directory();
 
         /**
          * Get the path to the shared objects of HAL.<br>
@@ -514,14 +514,14 @@ namespace hal
          *
          * @returns The path.
          */
-        CORE_API std::filesystem::path get_share_directory();
+        CORE_API std::experimental::filesystem::path get_share_directory();
 
         /**
          * Get the path to shared objects and files provided by the user.<br>
          *
          * @returns The path.
          */
-        CORE_API std::filesystem::path get_user_share_directory();
+        CORE_API std::experimental::filesystem::path get_user_share_directory();
 
         /**
          * Get the path to the read-only global configuration directory of HAL.<br>
@@ -529,14 +529,14 @@ namespace hal
          *
          * @returns The path.
          */
-        CORE_API std::filesystem::path get_config_directory();
+        CORE_API std::experimental::filesystem::path get_config_directory();
 
         /**
          * Get the path to the configuration directory of the user.<br>
          *
          * @returns The path.
          */
-        CORE_API std::filesystem::path get_user_config_directory();
+        CORE_API std::experimental::filesystem::path get_user_config_directory();
 
         /**
          * Get the path to the default directory for log files.<br>
@@ -545,21 +545,21 @@ namespace hal
          * @param[in] source_file - The netlist source file.
          * @returns The path.
          */
-        CORE_API std::filesystem::path get_default_log_directory(std::filesystem::path source_file = "");
+        CORE_API std::experimental::filesystem::path get_default_log_directory(std::experimental::filesystem::path source_file = "");
 
         /**
          * Get the paths to the locations where gate libraries are searched.<br>
          *
          * @returns A vector of paths.
          */
-        CORE_API std::vector<std::filesystem::path> get_gate_library_directories();
+        CORE_API std::vector<std::experimental::filesystem::path> get_gate_library_directories();
 
         /**
          * Get the paths to the locations where plugins are searched.<br>
          *
          * @returns A vector of paths.
          */
-        CORE_API std::vector<std::filesystem::path> get_plugin_directories();
+        CORE_API std::vector<std::experimental::filesystem::path> get_plugin_directories();
 
         /**
          * Get the first directory out of all the path hints that exists (searched in order).
@@ -567,7 +567,7 @@ namespace hal
          * @param[in] path_hints - A vector of hints.
          * @returns The first existing path or an empty string if none of them exists.
          */
-        CORE_API std::filesystem::path get_first_directory_exists(std::vector<std::filesystem::path> path_hints);
+        CORE_API std::experimental::filesystem::path get_first_directory_exists(std::vector<std::experimental::filesystem::path> path_hints);
 
         /**
          * Search for the given filename in all paths provided by the path hints (searched in order).
@@ -576,7 +576,7 @@ namespace hal
          * @param[in] path_hints - A vector of hints.
          * @returns The first to match or an empty string if no match is found.
          */
-        CORE_API std::filesystem::path get_file(std::string file_name, std::vector<std::filesystem::path> path_hints);
+        CORE_API std::experimental::filesystem::path get_file(std::string file_name, std::vector<std::experimental::filesystem::path> path_hints);
 
         /**
          * Get the licenses of all embedded OpenSource Projects.
@@ -591,14 +591,14 @@ namespace hal
         class CORE_API RecursiveDirectoryRange
         {
         public:
-            using iterator = std::filesystem::recursive_directory_iterator;
+            using iterator = std::experimental::filesystem::recursive_directory_iterator;
 
             /**
              * Construct a recursive directory range from a top level directory.
              *
              * @param[in] path - The path to the top level directory.
              */
-            RecursiveDirectoryRange(std::filesystem::path path) : p_(path)
+            RecursiveDirectoryRange(std::experimental::filesystem::path path) : p_(path)
             {
             }
 
@@ -610,7 +610,7 @@ namespace hal
              */
             iterator begin()
             {
-                return std::filesystem::recursive_directory_iterator(p_);
+                return std::experimental::filesystem::recursive_directory_iterator(p_);
             }
 
             /**
@@ -620,11 +620,11 @@ namespace hal
              */
             iterator end()
             {
-                return std::filesystem::recursive_directory_iterator();
+                return std::experimental::filesystem::recursive_directory_iterator();
             }
 
         private:
-            std::filesystem::path p_;
+            std::experimental::filesystem::path p_;
         };
 
         /**
@@ -633,14 +633,14 @@ namespace hal
         class CORE_API DirectoryRange
         {
         public:
-            using iterator = std::filesystem::directory_iterator;
+            using iterator = std::experimental::filesystem::directory_iterator;
 
             /**
              * Construct a directory range from a top level directory.
              *
              * @param[in] path - The top level directory.
              */
-            DirectoryRange(std::filesystem::path path) : p_(path)
+            DirectoryRange(std::experimental::filesystem::path path) : p_(path)
             {
             }
 
@@ -653,7 +653,7 @@ namespace hal
              */
             iterator begin()
             {
-                return std::filesystem::directory_iterator(p_);
+                return std::experimental::filesystem::directory_iterator(p_);
             }
 
             /**
@@ -663,11 +663,11 @@ namespace hal
              */
             iterator end()
             {
-                return std::filesystem::directory_iterator();
+                return std::experimental::filesystem::directory_iterator();
             }
 
         private:
-            std::filesystem::path p_;
+            std::experimental::filesystem::path p_;
         };
     }    // namespace utils
 }    // namespace hal

@@ -28,7 +28,7 @@
 #include "hal_core/netlist/gate_library/gate_type.h"
 #include "rapidjson/document.h"
 
-#include <filesystem>
+#include <experimental/filesystem>
 #include <map>
 #include <optional>
 #include <unordered_map>
@@ -50,7 +50,7 @@ namespace hal
          * @param[in] file_path - Path to the file containing the gate library definition.
          * @returns The gate library or a nullptr on failure.
          */
-        std::unique_ptr<GateLibrary> parse(const std::filesystem::path& file_path) override;
+        std::unique_ptr<GateLibrary> parse(const std::experimental::filesystem::path& file_path) override;
 
     private:
         struct PinCtx
@@ -62,7 +62,7 @@ namespace hal
         };
 
         std::unique_ptr<GateLibrary> m_gate_lib;
-        std::filesystem::path m_path;
+        std::experimental::filesystem::path m_path;
 
         std::set<std::string> m_cell_names;
 

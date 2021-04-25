@@ -627,7 +627,7 @@ namespace hal
             }
         }    // namespace
 
-        bool serialize_to_file(Netlist* nl, const std::filesystem::path& hal_file)
+        bool serialize_to_file(Netlist* nl, const std::experimental::filesystem::path& hal_file)
         {
             if (nl == nullptr)
             {
@@ -674,7 +674,7 @@ namespace hal
             return true;
         }
 
-        std::unique_ptr<Netlist> deserialize_from_file(const std::filesystem::path& hal_file)
+        std::unique_ptr<Netlist> deserialize_from_file(const std::experimental::filesystem::path& hal_file)
         {
             auto begin_time = std::chrono::high_resolution_clock::now();
 

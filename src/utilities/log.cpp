@@ -11,10 +11,10 @@ namespace hal
 {
     std::map<std::string, std::shared_ptr<LogManager::log_sink>> LogManager::m_file_sinks;
 
-    LogManager::LogManager(const std::filesystem::path& file_name)
+    LogManager::LogManager(const std::experimental::filesystem::path& file_name)
     {
         m_file_path = (file_name.empty()) ? utils::get_default_log_directory() / "hal.log" : file_name;
-        std::filesystem::create_directories(m_file_path.parent_path());
+        std::experimental::filesystem::create_directories(m_file_path.parent_path());
 
         m_level = {
             {"trace", spdlog::level::level_enum::trace},
@@ -52,7 +52,7 @@ namespace hal
         spdlog::drop_all();
     }
 
-    LogManager& LogManager::get_instance(const std::filesystem::path& file_name)
+    LogManager& LogManager::get_instance(const std::experimental::filesystem::path& file_name)
     {
         static LogManager l(file_name);
         return l;
@@ -209,9 +209,9 @@ namespace hal
         return sink;
     }
 
-    std::shared_ptr<LogManager::log_sink> LogManager::create_file_sink(const std::filesystem::path& file_name, const bool truncate)
+    std::shared_ptr<LogManager::log_sink> LogManager::create_file_sink(const std::experimental::filesystem::path& file_name, const bool truncate)
     {
-        std::filesystem::path path = file_name;
+        std::experimental::filesystem::path path = file_name;
         if (file_name.empty())
             path = get_instance().m_file_path;
 
@@ -247,7 +247,7 @@ namespace hal
         return levels;
     }
 
-    void LogManager::set_file_name(const std::filesystem::path& file_path)
+    void LogManager::set_file_name(const std::experimental::filesystem::path& file_path)
     {
         log_info("core", "setting log file to '{}'.", file_path.string());
 

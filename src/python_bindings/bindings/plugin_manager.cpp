@@ -13,7 +13,7 @@ namespace hal
             :rtype: set(str)
         )");
 
-        py_plugin_manager.def("load_all_plugins", &plugin_manager::load_all_plugins, py::arg("directory_names") = std::vector<std::filesystem::path>(), R"(
+        py_plugin_manager.def("load_all_plugins", &plugin_manager::load_all_plugins, py::arg("directory_names") = std::vector<std::experimental::filesystem::path>(), R"(
             Load all plugins in the specified directories. 
             If directory is empty, the default directories will be searched.
 

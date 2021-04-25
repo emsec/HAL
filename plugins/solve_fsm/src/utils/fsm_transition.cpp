@@ -11,8 +11,15 @@ namespace hal {
             log_error("FSM Solver", "end state is not a numeral.");
         }
 
-        starting_state = start.get_numeral_uint64();
-        end_state = end.get_numeral_uint64();
+        z3::context ctx;
+
+        long long unsigned int uStart, uEnd;
+
+        Z3_get_numeral_uint64(ctx, start, &uStart);
+        Z3_get_numeral_uint64(ctx, end, &uEnd);
+
+        starting_state = uStart;
+        end_state = uEnd;
 
         if (!inputs.empty()) {
             input_ids_to_values = {inputs};

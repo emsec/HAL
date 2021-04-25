@@ -191,7 +191,7 @@ namespace hal
 
         connect(model, &PluginModel::runPlugin, mMainWindow, &MainWindow::runPluginTriggered);
 
-        mWindowTitle = "HAL - " + QString::fromStdString(std::filesystem::path(fileName.toStdString()).stem().string());
+        mWindowTitle = "HAL - " + QString::fromStdString(std::experimental::filesystem::path(fileName.toStdString()).stem().string());
         mMainWindow->setWindowTitle(mWindowTitle);
 
 #ifdef HAL_STUDY

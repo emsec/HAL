@@ -16,7 +16,7 @@ namespace hal
 
             .def(
                 "load_netlist",
-                [](const std::filesystem::path& hdl_file, const std::filesystem::path& gate_library_file) {
+                [](const std::experimental::filesystem::path& hdl_file, const std::experimental::filesystem::path& gate_library_file) {
                     return std::shared_ptr<Netlist>(netlist_factory::load_netlist(hdl_file, gate_library_file));
                 },
                 py::arg("hdl_file"),
@@ -33,7 +33,7 @@ namespace hal
             )")
 
             .def(
-                "load_netlist", [](const std::filesystem::path& hal_file) { return std::shared_ptr<Netlist>(netlist_factory::load_netlist(hal_file)); }, py::arg("hal_file"), R"(
+                "load_netlist", [](const std::experimental::filesystem::path& hal_file) { return std::shared_ptr<Netlist>(netlist_factory::load_netlist(hal_file)); }, py::arg("hal_file"), R"(
                 Create a netlist from the given .hal file.
 
                 :param hal_file: Path to the '.hal' file.
@@ -44,7 +44,7 @@ namespace hal
 
             .def(
                 "load_netlists",
-                [](const std::filesystem::path& hal_file) {
+                [](const std::experimental::filesystem::path& hal_file) {
                     std::vector<std::shared_ptr<Netlist>> result;
                     for (auto& ptr : netlist_factory::load_netlists(hal_file))
                     {

@@ -14,7 +14,7 @@ namespace hal
     {
         namespace
         {
-            std::map<std::filesystem::path, std::unique_ptr<GateLibrary>> m_gate_libraries;
+            std::map<std::experimental::filesystem::path, std::unique_ptr<GateLibrary>> m_gate_libraries;
 
             bool prepare_library(const std::unique_ptr<GateLibrary>& lib)
             {
@@ -68,9 +68,9 @@ namespace hal
             }
         }    // namespace
 
-        GateLibrary* load(std::filesystem::path file_path, bool reload)
+        GateLibrary* load(std::experimental::filesystem::path file_path, bool reload)
         {
-            if (!std::filesystem::exists(file_path))
+            if (!std::experimental::filesystem::exists(file_path))
             {
                 log_error("gate_library_manager", "gate library file '{}' does not exist.", file_path.string());
                 return nullptr;
@@ -78,7 +78,7 @@ namespace hal
 
             if (!file_path.is_absolute())
             {
-                file_path = std::filesystem::absolute(file_path);
+                file_path = std::experimental::filesystem::absolute(file_path);
             }
 
             if (!reload)
@@ -108,11 +108,11 @@ namespace hal
 
         void load_all(bool reload)
         {
-            std::vector<std::filesystem::path> lib_dirs = utils::get_gate_library_directories();
+            std::vector<std::experimental::filesystem::path> lib_dirs = utils::get_gate_library_directories();
 
             for (const auto& lib_dir : lib_dirs)
             {
-                if (!std::filesystem::exists(lib_dir))
+                if (!std::experimental::filesystem::exists(lib_dir))
                 {
                     continue;
                 }
@@ -126,9 +126,9 @@ namespace hal
             }
         }
 
-        bool save(std::filesystem::path file_path, GateLibrary* gate_lib, bool overwrite)
+        bool save(std::experimental::filesystem::path file_path, GateLibrary* gate_lib, bool overwrite)
         {
-            if (std::filesystem::exists(file_path))
+            if (std::experimental::filesystem::exists(file_path))
             {
                 if (overwrite)
                 {
@@ -143,7 +143,7 @@ namespace hal
 
             if (!file_path.is_absolute())
             {
-                file_path = std::filesystem::absolute(file_path);
+                file_path = std::experimental::filesystem::absolute(file_path);
             }
 
             return gate_library_writer_manager::write(gate_lib, file_path);
@@ -151,17 +151,17 @@ namespace hal
 
         GateLibrary* get_gate_library(const std::string& file_path)
         {
-            std::filesystem::path absolute_path;
+            std::experimental::filesystem::path absolute_path;
 
-            if (std::filesystem::exists(file_path))
+            if (std::experimental::filesystem::exists(file_path))
             {
                 // if an existing file is queried, load it by its absolute path
-                absolute_path = std::filesystem::absolute(file_path);
+                absolute_path = std::experimental::filesystem::absolute(file_path);
             }
             else
             {
                 // if a non existing file is queried, search for it in the standard directories
-                auto stripped_name = std::filesystem::path(file_path).filename();
+                auto stripped_name = std::experimental::filesystem::path(file_path).filename();
                 log_info("gate_library_manager", "file '{}' does not exist, searching for '{}' in the default gate library directories...", file_path, stripped_name.string());
 
                 auto lib_path = utils::get_file(stripped_name, utils::get_gate_library_directories());
@@ -170,7 +170,7 @@ namespace hal
                     log_info("gate_library_manager", "could not find gate library file '{}'.", stripped_name.string());
                     return nullptr;
                 }
-                absolute_path = std::filesystem::absolute(lib_path);
+                absolute_path = std::experimental::filesystem::absolute(lib_path);
             }
 
             // absolute path to file is known, check if it is already loaded

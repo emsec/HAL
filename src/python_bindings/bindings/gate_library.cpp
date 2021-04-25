@@ -8,7 +8,7 @@ namespace hal
             A gate library is a collection of gate types including their pins and Boolean functions.
         )");
 
-        py_gate_library.def(py::init<const std::filesystem::path&, const std::string&>(), py::arg("path"), py::arg("name"), R"(
+        py_gate_library.def(py::init<const std::experimental::filesystem::path&, const std::string&>(), py::arg("path"), py::arg("name"), R"(
             Construct a gate library by specifying its name and the path to the file that describes the library.
 
             :param hal_py.hal_path path: The path to the gate library file.

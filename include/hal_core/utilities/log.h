@@ -106,7 +106,7 @@ namespace hal
             std::shared_ptr<spdlog::sinks::sink> spdlog_sink;
             bool is_file_sink;
             bool truncate;
-            std::filesystem::path path;
+            std::experimental::filesystem::path path;
         };
 
         /**
@@ -117,7 +117,7 @@ namespace hal
          * @param[in] file_name - The file where the log is stored.
          * @returns The log manager.
          */
-        static LogManager& get_instance(const std::filesystem::path& file_name = "");
+        static LogManager& get_instance(const std::experimental::filesystem::path& file_name = "");
 
         /**
          * Set the log file name.<br>
@@ -125,7 +125,7 @@ namespace hal
          *
          * @param[in] file_name - The desired log file.
          */
-        void set_file_name(const std::filesystem::path& file_name);
+        void set_file_name(const std::experimental::filesystem::path& file_name);
 
         /**
          * Set the logging format pattern.<br>
@@ -254,7 +254,7 @@ namespace hal
          * @param[in] truncate - Flag whether the file should be overwritten(true) or appended to(false).
          * @returns The new sink or the already existing sink.
          */
-        static std::shared_ptr<log_sink> create_file_sink(const std::filesystem::path& file_name = "", const bool truncate = false);
+        static std::shared_ptr<log_sink> create_file_sink(const std::experimental::filesystem::path& file_name = "", const bool truncate = false);
 
         /**
          * Create a new logging sink which prints to the GUI.
@@ -267,7 +267,7 @@ namespace hal
         static std::map<std::string, std::shared_ptr<log_sink>> m_file_sinks;
 
         // LogManager class constructor (private due to singleton)
-        LogManager(const std::filesystem::path& file_name);
+        LogManager(const std::experimental::filesystem::path& file_name);
 
         // LogManager class destructor (private due to singleton)
         ~LogManager();
@@ -278,7 +278,7 @@ namespace hal
         // LogManager class object non-copyable
         LogManager& operator=(const LogManager&) = delete;
 
-        std::filesystem::path m_file_path;
+        std::experimental::filesystem::path m_file_path;
 
         std::map<std::string, spdlog::level::level_enum> m_level;
 

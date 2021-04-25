@@ -270,7 +270,7 @@ namespace hal
 
             if (assignments.empty()) {
                 // in order to stay compliant with the rest of the converter structure we simply simulate a dummy assignment with a double negation.
-                auto dummy_assignment = "(let ((?x1 (bvnot (bvnot " + e.get_expr().to_string() + ")))))";
+                auto dummy_assignment = "(let ((?x1 (bvnot (bvnot " + z3toString(e.get_expr()) + ")))))";
                 assignments += generate_assignment(dummy_assignment);
             }
 

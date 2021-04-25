@@ -700,7 +700,7 @@ namespace hal
     {
         if (gNetlist)
         {
-            std::filesystem::path path = FileManager::get_instance()->fileName().toStdString();
+            std::experimental::filesystem::path path = FileManager::get_instance()->fileName().toStdString();
 
             if (path.empty())
             {

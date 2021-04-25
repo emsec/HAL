@@ -93,7 +93,7 @@ namespace hal
          * @param[in] directory_names - A vector of directory paths.
          * @returns True on success, false otherwise.
          */
-        bool load_all_plugins(const std::vector<std::filesystem::path>& directory_names = {});
+        bool load_all_plugins(const std::vector<std::experimental::filesystem::path>& directory_names = {});
 
         /**
          * Load a single plugin by specifying its name and file path.
@@ -102,7 +102,7 @@ namespace hal
          * @param[in] file_path - The path to the plugin file.
          * @returns True on success, false otherwise.
          */
-        bool load(const std::string& plugin_name, const std::filesystem::path& file_path);
+        bool load(const std::string& plugin_name, const std::experimental::filesystem::path& file_path);
 
         /**
          * Releases all plugins and their associated resources.

@@ -11,6 +11,7 @@
 #include "hal_core/netlist/persistent/netlist_serializer.h"
 #include "hal_core/plugin_system/plugin_manager.h"
 #include "z3_utils/include/plugin_z3_utils.h"
+#include "z3_utils/include/z3Wrapper.h"
 
 #include <fstream>
 #include <iostream>
@@ -181,8 +182,8 @@ namespace hal
                 }
 
                 // TODO this conversion is only necessary because there is no default constructor for z3::expr. Will need to modify the fsm transition type.
-                z3::expr state_expr      = ctx.bv_val(state, state_size);
-                z3::expr next_state_expr = ctx.bv_val(next_state, state_size);
+                z3::expr state_expr      = ctx.bv_val((long long unsigned int) state, state_size);
+                z3::expr next_state_expr = ctx.bv_val((long long unsigned int) next_state, state_size);
                 all_transitions.push_back(FsmTransition(state_expr, next_state_expr, input_id_to_val));
             }
         }
@@ -322,7 +323,7 @@ namespace hal
 
             // bitvector representing the previous state
             z3::expr prev_expr = ctx.bv_const((std::to_string(net_id)).c_str(), 1);
-            if (prev_state_vec.to_string() == "null")
+            if (hal::z3_utils::z3toString(prev_state_vec) == "null")
             {
                 prev_state_vec = prev_expr;
             }
@@ -333,7 +334,7 @@ namespace hal
 
             // bitvector including all the functions to calculate the next state
             z3::expr func = state_net_to_expr.at(net_id);
-            if (next_state_vec.to_string() == "null")
+            if (hal::z3_utils::z3toString(next_state_vec) == "null")
             {
                 next_state_vec = func;
             }
@@ -367,7 +368,7 @@ namespace hal
                     temp = ctx.bv_val(initial_state.at(gate), 1);
                 }
 
-                if (init.to_string() == "null")
+                if (hal::z3_utils::z3toString(init) == "null")
                 {
                     init = temp;
                 }
@@ -395,11 +396,11 @@ namespace hal
             z3::expr n = q.front();
             q.pop_front();
 
-            if (visited.find(n.to_string()) != visited.end())
+            if (visited.find(hal::z3_utils::z3toString(n)) != visited.end())
             {
                 continue;
             }
-            visited.insert(n.to_string());
+            visited.insert(hal::z3_utils::z3toString(n));
 
             // generate new transitions and add them to the queue
             std::vector<hal::FsmTransition> new_transitions = get_state_successors(prev_state_vec, next_state_vec, n, external_ids_to_expr);
@@ -515,7 +516,7 @@ namespace hal
     {
         std::vector<u32> relevant_inputs;
 
-        const std::string str = state.to_string();
+        const std::string str = hal::z3_utils::z3toString(state);
         for (const auto& [id, _] : external_ids_to_expr)
         {
             if (str.find("|" + std::to_string(id) + "|") != std::string::npos)
@@ -536,7 +537,7 @@ namespace hal
         for (u32 i = 0; i < inputs.size(); i++)
         {
             u64 val           = (input_values >> i) & 0x1;
-            z3::expr val_expr = state.ctx().bv_val(val, 1);
+            z3::expr val_expr = state.ctx().bv_val((long long unsigned int) val, 1);
             z3::expr id_expr  = state.ctx().bv_const(std::to_string(inputs.at(i)).c_str(), 1);
 
             s.add(id_expr == val_expr);

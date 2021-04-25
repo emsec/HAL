@@ -2,7 +2,7 @@
 
 #include "hal_core/defines.h"
 
-#include <filesystem>
+#include <experimental/filesystem>
 #include <vector>
 
 namespace hal
@@ -23,7 +23,7 @@ namespace hal
          * @param[in] reload - If true, reloads the library in case it is already loaded.
          * @returns The gate library on success, nullptr otherwise.
          */
-        NETLIST_API GateLibrary* load(std::filesystem::path file_path, bool reload = false);
+        NETLIST_API GateLibrary* load(std::experimental::filesystem::path file_path, bool reload = false);
 
         /**
          * Load all gate libraries available in standard gate library directories.
@@ -41,7 +41,7 @@ namespace hal
          * @returns True on success, false otherwise.
          */
         // TODO test
-        NETLIST_API bool save(std::filesystem::path file_path, GateLibrary* gate_lib, bool overwrite = false);
+        NETLIST_API bool save(std::experimental::filesystem::path file_path, GateLibrary* gate_lib, bool overwrite = false);
 
         /**
          * Get a gate library by file path. If no library with the given name is loaded, loading the gate library from file will be attempted.

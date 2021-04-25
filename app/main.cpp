@@ -92,7 +92,7 @@ int main(int argc, const char* argv[])
 
     if (args.is_option_set("--logfile"))
     {
-        lm.set_file_name(std::filesystem::path(args.get_parameter("--logfile")));
+        lm.set_file_name(std::experimental::filesystem::path(args.get_parameter("--logfile")));
     }
     lm.handle_options(args);
 
@@ -233,15 +233,15 @@ int main(int argc, const char* argv[])
         return cleanup();
     }
 
-    std::filesystem::path file_name;
+    std::experimental::filesystem::path file_name;
 
     if (args.is_option_set("--empty-netlist"))
     {
-        file_name = std::filesystem::path("./empty_netlist.hal");
+        file_name = std::experimental::filesystem::path("./empty_netlist.hal");
     }
     else
     {
-        file_name = std::filesystem::path(args.get_parameter("--input-file"));
+        file_name = std::experimental::filesystem::path(args.get_parameter("--input-file"));
     }
 
     if (args.is_option_set("--no-log"))

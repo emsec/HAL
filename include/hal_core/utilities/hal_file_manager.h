@@ -48,7 +48,7 @@ namespace hal
          * @param[in] document - The JSON document to serialize to.
          * @returns True if all registered callbacks succeed.
          */
-        bool serialize(const std::filesystem::path& file, Netlist* netlist, rapidjson::Document& document);
+        bool serialize(const std::experimental::filesystem::path& file, Netlist* netlist, rapidjson::Document& document);
 
         /**
          * Starts deserialization of a .hal file.<br>
@@ -58,7 +58,7 @@ namespace hal
          * @param[in] document - The JSON document to deserialize from.
          * @returns True if all registered callbacks succeed.
          */
-        bool deserialize(const std::filesystem::path& file, Netlist* netlist, rapidjson::Document& document);
+        bool deserialize(const std::experimental::filesystem::path& file, Netlist* netlist, rapidjson::Document& document);
 
         /**
          * Add a callback to notify when a .hal file is being serialized.
@@ -66,10 +66,10 @@ namespace hal
          * @param[in] identifier - An identifier name that can be used to remove the callback later.
          * @param[in] callback - The callback function. Parameters are:
          * * bool - Returns whether data was successfully extended, saving is aborted if False.
-         * * const std::filesystem::path& - The hal file.
+         * * const std::experimental::filesystem::path& - The hal file.
          * * rapidjson::Document& - The content to fill.
          */
-        void register_on_serialize_callback(const std::string& identifier, std::function<bool(const std::filesystem::path&, Netlist*, rapidjson::Document&)> callback);
+        void register_on_serialize_callback(const std::string& identifier, std::function<bool(const std::experimental::filesystem::path&, Netlist*, rapidjson::Document&)> callback);
 
         /**
          * Removes a callback to notify when a .hal file is being serialized.
@@ -84,10 +84,10 @@ namespace hal
          * @param[in] identifier - An identifier name that can be used to remove the callback later.
          * @param[in] callback - The callback function. Parameters are:
          * * bool - Returns whether data was successfully read, loading is aborted if False.
-         * * const std::filesystem::path& - The hal file.
+         * * const std::experimental::filesystem::path& - The hal file.
          * * rapidjson::Document& - The content to fill.
          */
-        void register_on_deserialize_callback(const std::string& identifier, std::function<bool(const std::filesystem::path&, Netlist*, rapidjson::Document&)> callback);
+        void register_on_deserialize_callback(const std::string& identifier, std::function<bool(const std::experimental::filesystem::path&, Netlist*, rapidjson::Document&)> callback);
 
         /**
          * Removes a callback to notify when a .hal file is being deserialized.

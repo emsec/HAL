@@ -81,7 +81,7 @@ namespace hal
          * @param[in] file_name - The output file name.
          * @returns True on success.
          */
-        bool write(Netlist* netlist, const std::filesystem::path& file_name);
+        bool write(Netlist* netlist, const std::experimental::filesystem::path& file_name);
 
         /**
          * Writes the netlist into a stringstream with a defined format

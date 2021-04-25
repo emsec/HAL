@@ -75,7 +75,7 @@ namespace hal
     {
         if (args.is_option_set("--input-file"))
         {
-            auto fileName = std::filesystem::path(args.get_parameter("--input-file"));
+            auto fileName = std::experimental::filesystem::path(args.get_parameter("--input-file"));
             log_info("gui", "GUI started with file {}.", fileName.string());
             openFile(QString::fromStdString(fileName.string()));
         }
@@ -216,8 +216,8 @@ namespace hal
         }
 
         LogManager& lm                 = LogManager::get_instance();
-        std::filesystem::path log_path = fileName.toStdString();
-        lm.set_file_name(std::filesystem::path(log_path.replace_extension(".log")));
+        std::experimental::filesystem::path log_path = fileName.toStdString();
+        lm.set_file_name(std::experimental::filesystem::path(log_path.replace_extension(".log")));
 
         if (fileName.endsWith(".hal"))
         {
@@ -408,14 +408,14 @@ namespace hal
 
         gGuiState->beginWriteArray("recent_files");
         int i = 0;
-        std::vector<std::filesystem::path> files;
+        std::vector<std::experimental::filesystem::path> files;
         for (QString& string : list)
         {
-            std::filesystem::path file_path(string.toStdString());
+            std::experimental::filesystem::path file_path(string.toStdString());
             bool skip = false;
             for (const auto& other : files)
             {
-                if (std::filesystem::equivalent(file_path, other))
+                if (std::experimental::filesystem::equivalent(file_path, other))
                 {
                     skip = true;
                     break;

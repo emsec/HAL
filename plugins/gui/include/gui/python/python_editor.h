@@ -395,7 +395,7 @@ namespace hal
          * @param document - The json document of the .hal file
          * @returns true on success
          */
-        bool handleSerializationToHalFile(const std::filesystem::path& path, Netlist* netlist, rapidjson::Document& document);
+        bool handleSerializationToHalFile(const std::experimental::filesystem::path& path, Netlist* netlist, rapidjson::Document& document);
 
         /**
          * Deserialize the necessary information from the .hal file that is loaded.
@@ -406,7 +406,7 @@ namespace hal
          * @param document - The json document of the .hal file
          * @returns true on success
          */
-        bool handleDeserializationFromHalFile(const std::filesystem::path& path, Netlist* netlist, rapidjson::Document& document);
+        bool handleDeserializationFromHalFile(const std::experimental::filesystem::path& path, Netlist* netlist, rapidjson::Document& document);
 
     Q_SIGNALS:
         void forwardStdout(const QString& output);

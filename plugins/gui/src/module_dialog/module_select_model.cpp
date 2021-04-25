@@ -171,7 +171,7 @@ namespace hal {
     void ModuleSelectProxy::searchTextChanged(const QString& txt)
     {
         setFilterKeyColumn(-1);
-        setFilterRegularExpression(txt);
+        setFilterRegExp(txt);
     }
 
     //---------------- EXCLUDE ----------------------------------------

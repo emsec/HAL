@@ -17,7 +17,7 @@ namespace hal
             std::unordered_map<std::string, std::vector<std::string>> m_parser_to_extensions;
             std::unordered_map<std::string, std::pair<std::string, ParserFactory>> m_extension_to_parser;
 
-            ParserFactory get_parser_factory_for_file(const std::filesystem::path& file_name)
+            ParserFactory get_parser_factory_for_file(const std::experimental::filesystem::path& file_name)
             {
                 std::string extension = utils::to_lower(file_name.extension().string());
                 if (!extension.empty() && extension[0] != '.')
@@ -36,7 +36,7 @@ namespace hal
             }
 
             std::vector<std::unique_ptr<Netlist>>
-                dispatch_parse(const std::filesystem::path& file_name, std::unique_ptr<HDLParser> parser, const GateLibrary* gate_library = nullptr, bool break_on_match = true)
+                dispatch_parse(const std::experimental::filesystem::path& file_name, std::unique_ptr<HDLParser> parser, const GateLibrary* gate_library = nullptr, bool break_on_match = true)
             {
                 auto begin_time = std::chrono::high_resolution_clock::now();
 
@@ -176,7 +176,7 @@ namespace hal
             }
         }
 
-        std::unique_ptr<Netlist> parse(const std::filesystem::path& file_name, const ProgramArguments& args)
+        std::unique_ptr<Netlist> parse(const std::experimental::filesystem::path& file_name, const ProgramArguments& args)
         {
             ParserFactory factory = get_parser_factory_for_file(file_name);
             if (!factory)
@@ -200,7 +200,7 @@ namespace hal
             return parse(file_name, gate_library);
         }
 
-        std::unique_ptr<Netlist> parse(const std::filesystem::path& file_name, const GateLibrary* gate_library)
+        std::unique_ptr<Netlist> parse(const std::experimental::filesystem::path& file_name, const GateLibrary* gate_library)
         {
             ParserFactory factory = get_parser_factory_for_file(file_name);
             if (!factory)
@@ -218,7 +218,7 @@ namespace hal
             return std::move(netlists.at(0));
         }
 
-        std::vector<std::unique_ptr<Netlist>> parse_all(const std::filesystem::path& file_name)
+        std::vector<std::unique_ptr<Netlist>> parse_all(const std::experimental::filesystem::path& file_name)
         {
             ParserFactory factory = get_parser_factory_for_file(file_name);
             if (!factory)

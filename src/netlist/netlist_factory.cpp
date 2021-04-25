@@ -26,7 +26,7 @@ namespace hal
             return std::make_unique<Netlist>(gate_library);
         }
 
-        std::unique_ptr<Netlist> load_netlist(const std::filesystem::path& hdl_file, const std::filesystem::path& gate_library_file)
+        std::unique_ptr<Netlist> load_netlist(const std::experimental::filesystem::path& hdl_file, const std::experimental::filesystem::path& gate_library_file)
         {
             if (access(hdl_file.c_str(), F_OK | R_OK) == -1)
             {
@@ -44,7 +44,7 @@ namespace hal
             return hdl_parser_manager::parse(hdl_file, lib);
         }
 
-        std::unique_ptr<Netlist> load_netlist(const std::filesystem::path& hal_file)
+        std::unique_ptr<Netlist> load_netlist(const std::experimental::filesystem::path& hal_file)
         {
             if (access(hal_file.c_str(), F_OK | R_OK) == -1)
             {
@@ -63,7 +63,7 @@ namespace hal
                 return nullptr;
             }
 
-            std::filesystem::path file_name = std::filesystem::path(args.get_parameter("--input-file"));
+            std::experimental::filesystem::path file_name = std::experimental::filesystem::path(args.get_parameter("--input-file"));
 
             if (access(file_name.c_str(), F_OK | R_OK) == -1)
             {
@@ -81,7 +81,7 @@ namespace hal
             return hdl_parser_manager::parse(file_name, args);
         }
 
-        std::vector<std::unique_ptr<Netlist>> load_netlists(const std::filesystem::path& hdl_file)
+        std::vector<std::unique_ptr<Netlist>> load_netlists(const std::experimental::filesystem::path& hdl_file)
         {
             if (access(hdl_file.c_str(), F_OK | R_OK) == -1)
             {

@@ -47,7 +47,7 @@ namespace hal
          * @param[in] path - The path to the gate library file.
          * @param[in] name - The name of the gate library.
          */
-        GateLibrary(const std::filesystem::path& path, const std::string& name);
+        GateLibrary(const std::experimental::filesystem::path& path, const std::string& name);
         ~GateLibrary() = default;
 
         /**
@@ -62,7 +62,7 @@ namespace hal
          *
          * @returns The path to the gate library file.
          */
-        std::filesystem::path get_path() const;
+        std::experimental::filesystem::path get_path() const;
 
         /**
          * Create a new gate type, add it to the gate library, and return it.
@@ -150,7 +150,7 @@ namespace hal
 
     private:
         std::string m_name;
-        std::filesystem::path m_path;
+        std::experimental::filesystem::path m_path;
 
         u32 m_next_gate_type_id;
 

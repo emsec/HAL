@@ -17,7 +17,7 @@ namespace hal
             std::unordered_map<std::string, std::vector<std::string>> m_parser_to_extensions;
             std::unordered_map<std::string, std::pair<std::string, ParserFactory>> m_extension_to_parser;
 
-            ParserFactory get_parser_factory_for_file(const std::filesystem::path& file_name)
+            ParserFactory get_parser_factory_for_file(const std::experimental::filesystem::path& file_name)
             {
                 auto extension = utils::to_lower(file_name.extension().string());
                 if (!extension.empty() && extension[0] != '.')
@@ -73,7 +73,7 @@ namespace hal
             }
         }
 
-        std::unique_ptr<GateLibrary> parse(std::filesystem::path file_path)
+        std::unique_ptr<GateLibrary> parse(std::experimental::filesystem::path file_path)
         {
             auto factory = get_parser_factory_for_file(file_path);
             if (!factory)

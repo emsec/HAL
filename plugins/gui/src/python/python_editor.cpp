@@ -183,7 +183,7 @@ namespace hal
         hal_file_manager::register_on_deserialize_callback("PythonEditor", std::bind(&PythonEditor::handleDeserializationFromHalFile, this, _1, _2, _3));
     }
 
-    bool PythonEditor::handleSerializationToHalFile(const std::filesystem::path& path, Netlist* netlist, rapidjson::Document& document)
+    bool PythonEditor::handleSerializationToHalFile(const std::experimental::filesystem::path& path, Netlist* netlist, rapidjson::Document& document)
     {
         UNUSED(path);
         UNUSED(netlist);
@@ -221,7 +221,7 @@ namespace hal
         return true;
     }
 
-    bool PythonEditor::handleDeserializationFromHalFile(const std::filesystem::path& path, Netlist* netlist, rapidjson::Document& document)
+    bool PythonEditor::handleDeserializationFromHalFile(const std::experimental::filesystem::path& path, Netlist* netlist, rapidjson::Document& document)
     {
         UNUSED(path);
 

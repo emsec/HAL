@@ -16,8 +16,13 @@ namespace hal
 
     namespace z3_utils
     {
+        std::string z3toString(const z3::ast& a);
+
+        z3::expr_vector z3ParseString(z3::context& ctx, char const* s);
+
         class z3Wrapper
         {
+
         public:
             /**
              * Constructor that generates a Z3Wrapper around a z3::expr and provides usefull utility tools for said expr.
@@ -108,7 +113,7 @@ namespace hal
              * @param[in] path - Path where the file is written to.
              * @returns True in case of success, false otherwise.
              */
-            bool write_verilog_file(const std::filesystem::path& path) const;
+            bool write_verilog_file(const std::experimental::filesystem::path& path) const;
 
             /**
              * Transforms the wrapped z3 expression into efficent c code and writes it to a file.
@@ -116,7 +121,7 @@ namespace hal
              * @param[in] path - Path where the file is written to.
              * @returns True in case of success, false otherwise.
              */
-            bool write_c_file(const std::filesystem::path& path) const;
+            bool write_c_file(const std::experimental::filesystem::path& path) const;
 
             /**
              * Removes all net ids from the wrapped expression that are driven by GND or VCC gates and replaces them with constant 0/1 expressions.

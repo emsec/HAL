@@ -85,12 +85,12 @@ namespace hal
 
         // changing cwd not required
         // PyRun_SimpleString("import os");
-        // PyRun_SimpleString(("os.chdir(\""+ std::filesystem::current_path().string() +"\")").c_str());
+        // PyRun_SimpleString(("os.chdir(\""+ std::experimental::filesystem::current_path().string() +"\")").c_str());
 
         if (args.is_option_set("--python-script"))
         {
             auto file_path = args.get_parameter("--python-script");
-            if (!std::filesystem::exists(file_path) || std::filesystem::is_directory(file_path) || !utils::ends_with(file_path, std::string(".py")))
+            if (!std::experimental::filesystem::exists(file_path) || std::experimental::filesystem::is_directory(file_path) || !utils::ends_with(file_path, std::string(".py")))
             {
                 log_error(get_name(), "'{}' is not a python script file", file_path);
                 return false;

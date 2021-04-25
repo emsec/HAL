@@ -67,6 +67,6 @@ namespace hal
          * @param[in] file_path - The input path.
          * @returns The gate library.
          */
-        NETLIST_API std::unique_ptr<GateLibrary> parse(std::filesystem::path file_path);
+        NETLIST_API std::unique_ptr<GateLibrary> parse(std::experimental::filesystem::path file_path);
     }    // namespace gate_library_parser_manager
 }    // namespace hal

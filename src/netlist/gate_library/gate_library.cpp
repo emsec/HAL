@@ -5,7 +5,7 @@
 
 namespace hal
 {
-    GateLibrary::GateLibrary(const std::filesystem::path& path, const std::string& name) : m_name(name), m_path(path)
+    GateLibrary::GateLibrary(const std::experimental::filesystem::path& path, const std::string& name) : m_name(name), m_path(path)
     {
         m_next_gate_type_id = 1;
     }
@@ -15,7 +15,7 @@ namespace hal
         return m_name;
     }
 
-    std::filesystem::path GateLibrary::get_path() const
+    std::experimental::filesystem::path GateLibrary::get_path() const
     {
         return m_path;
     }

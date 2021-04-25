@@ -55,7 +55,7 @@ namespace hal
          * @param[in] file_path - The output path.
          * @returns True on success.
          */
-        bool write(const GateLibrary* gate_lib, const std::filesystem::path& file_path) override;
+        bool write(const GateLibrary* gate_lib, const std::experimental::filesystem::path& file_path) override;
 
     private:
         struct PinCtx

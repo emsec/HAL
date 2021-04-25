@@ -75,7 +75,7 @@ namespace hal
          * @param[in] args - The command line options.
          * @returns The netlist representation of the hdl code or a nullpointer on error.
          */
-        NETLIST_API std::unique_ptr<Netlist> parse(const std::filesystem::path& file_name, const ProgramArguments& args);
+        NETLIST_API std::unique_ptr<Netlist> parse(const std::experimental::filesystem::path& file_name, const ProgramArguments& args);
 
         /**
          * Returns the netlist for a file, parsed with a defined gate library.
@@ -84,7 +84,7 @@ namespace hal
          * @param[in] gate_library - The gate library used in the file.
          * @returns The netlist representation of the hdl code or a nullpointer on error.
          */
-        NETLIST_API std::unique_ptr<Netlist> parse(const std::filesystem::path& file_name, const GateLibrary* gate_library = nullptr);
+        NETLIST_API std::unique_ptr<Netlist> parse(const std::experimental::filesystem::path& file_name, const GateLibrary* gate_library = nullptr);
 
         /**
           * Tries to match the HDL file with each of the preloaded gate libraries and returns a vector of netlist objects for which the matching was successful.
@@ -92,6 +92,6 @@ namespace hal
           * @param[in] hdl_file - The netlist file.
           * @returns A vector containing one netlist per matching gate library.
           */
-        std::vector<std::unique_ptr<Netlist>> parse_all(const std::filesystem::path& file_name);
+        std::vector<std::unique_ptr<Netlist>> parse_all(const std::experimental::filesystem::path& file_name);
     }    // namespace hdl_parser_manager
 }    // namespace hal

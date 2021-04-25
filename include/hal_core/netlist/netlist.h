@@ -84,14 +84,14 @@ namespace hal
          *
          * @returns The path to the input file.
          */
-        std::filesystem::path get_input_filename() const;
+        std::experimental::filesystem::path get_input_filename() const;
 
         /**
          * Set the path to the input file.
          *
          * @param[in] path - The path to the input file.
          */
-        void set_input_filename(const std::filesystem::path& path);
+        void set_input_filename(const std::experimental::filesystem::path& path);
 
         /**
          * Get the name of the design.
@@ -718,7 +718,7 @@ namespace hal
         u32 m_netlist_id;
 
         /* stores the name of the input file */
-        std::filesystem::path m_file_name;
+        std::experimental::filesystem::path m_file_name;
 
         /* stores the name of the design */
         std::string m_design_name;
