@@ -381,6 +381,16 @@ namespace hal
         void handleActionPlayMacro();
 
         /**
+         * Q_SLOT to load recorded macro for stepwise execution. Will query for XML file name.
+         */
+        void handleActionLoadMacro();
+
+        /**
+         * Q_SLOT to execute a single macro step. Requires previous call of loadMacro.
+         */
+        void handleActionMacroStep();
+
+        /**
          * Q_SLOT to undo last interaction if it can be undone
          */
         void handleActionUndo();
@@ -439,6 +449,8 @@ namespace hal
         Action* mActionStartRecording;
         Action* mActionStopRecording;
         Action* mActionPlayMacro;
+        Action* mActionLoadMacro;
+        Action* mActionMacroStep;
         Action* mActionUndo;
 
         Action* mActionSettings;

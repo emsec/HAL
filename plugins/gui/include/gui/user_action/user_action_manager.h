@@ -63,6 +63,12 @@ namespace hal
         /// execute macro from file
         void playMacro(const QString& macroFilename);
 
+        /// load macro from file for stepwise execution
+        void loadMacro(const QString& macroFilename);
+
+        /// execute next macro step
+        void nextMacroStep();
+
         /// test whether actions are currently recorded
         bool isRecording() const;
 
@@ -86,14 +92,19 @@ namespace hal
         void crashDump(int sig);
     private:
         UserActionManager(QObject *parent = nullptr);
+
+        bool loadMacroInternal(const QString& macroFilename);
+        void endSingleStepMode();
         void testUndo();
 
         QList<UserAction*> mActionHistory;
         QHash<QString,UserActionFactory*> mActionFactory;
         int mStartRecording;
         int mWaitCount;
+        int mNextSingleStep;
         QElapsedTimer mElapsedTime;
         bool mRecordHashAttribute;
+        bool mExecutingMacro;
 
         static UserActionManager* inst;
         QPlainTextEdit* mDumpAction;
@@ -104,5 +115,7 @@ namespace hal
 
     Q_SIGNALS:
         void canUndoLastAction(bool yesWeCan);
+
+        void canExecuteMacroStep(bool yesWeCan);
     };
 }

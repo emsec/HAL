@@ -124,6 +124,8 @@ namespace hal
         mActionStartRecording = new Action(this);
         mActionStopRecording  = new Action(this);
         mActionPlayMacro      = new Action(this);
+        mActionLoadMacro      = new Action(this);
+        mActionMacroStep      = new Action(this);
         mActionUndo           = new Action(this);
 
         mActionSettings = new Action(this);
@@ -182,6 +184,9 @@ namespace hal
         mMenuMacro->addAction(mActionStopRecording);
         mMenuMacro->addSeparator();
         mMenuMacro->addAction(mActionPlayMacro);
+        mMenuMacro->addSeparator();
+        mMenuMacro->addAction(mActionLoadMacro);
+        mMenuMacro->addAction(mActionMacroStep);
         mMenuHelp->addAction(mActionAbout);
         mLeftToolBar->addAction(mActionNew);
         mLeftToolBar->addAction(mActionOpen);
@@ -192,10 +197,14 @@ namespace hal
         mActionStartRecording->setText("Start recording");
         mActionStopRecording->setText("Stop recording");
         mActionPlayMacro->setText("Play macro");
+        mActionLoadMacro->setText("Load macro (step-by-step)");
+        mActionMacroStep->setText("Execute next macro step");
 
         mActionStartRecording->setEnabled(true);
         mActionStopRecording->setEnabled(false);
         mActionPlayMacro->setEnabled(true);
+        mActionLoadMacro->setEnabled(true);
+        mActionMacroStep->setEnabled(false);
 
         setWindowTitle("HAL");
         mActionNew->setText("New Netlist");
@@ -257,6 +266,8 @@ namespace hal
         connect(mActionStartRecording, &Action::triggered, this, &MainWindow::handleActionStartRecording);
         connect(mActionStopRecording, &Action::triggered, this, &MainWindow::handleActionStopRecording);
         connect(mActionPlayMacro, &Action::triggered, this, &MainWindow::handleActionPlayMacro);
+        connect(mActionLoadMacro, &Action::triggered, this, &MainWindow::handleActionLoadMacro);
+        connect(mActionMacroStep, &Action::triggered, this, &MainWindow::handleActionMacroStep);
         connect(mActionUndo,
                 &Action::triggered,
                 this,
@@ -266,6 +277,7 @@ namespace hal
         connect(this, &MainWindow::saveTriggered, gGraphContextManager, &GraphContextManager::handleSaveTriggered);
 
         connect(UserActionManager::instance(), &UserActionManager::canUndoLastAction, this, &MainWindow::enableUndo);
+        connect(UserActionManager::instance(), &UserActionManager::canExecuteMacroStep, mActionMacroStep, &QAction::setEnabled);
         connect(sSettingStyle, &SettingsItemDropdown::intChanged, this, &MainWindow::reloadStylsheet);
         enableUndo(false);
 
@@ -638,6 +650,7 @@ namespace hal
         mActionStartRecording->setEnabled(false);
         mActionStopRecording->setEnabled(true);
         mActionPlayMacro->setEnabled(false);
+        mActionLoadMacro->setEnabled(false);
         UserActionManager::instance()->setStartRecording();
     }
 
@@ -646,6 +659,7 @@ namespace hal
         mActionStartRecording->setEnabled(true);
         mActionStopRecording->setEnabled(false);
         mActionPlayMacro->setEnabled(true);
+        mActionLoadMacro->setEnabled(true);
         UserActionManager* uam = UserActionManager::instance();
         QString macroFile;
         if (uam->hasRecorded())
@@ -662,6 +676,18 @@ namespace hal
         QString macroFile = QFileDialog::getOpenFileName(this, "Load macro file", ".", "Macro files (*.xml);;All files(*)");
         if (!macroFile.isEmpty())
             UserActionManager::instance()->playMacro(macroFile);
+    }
+
+    void MainWindow::handleActionLoadMacro()
+    {
+          QString macroFile = QFileDialog::getOpenFileName(this, "Load macro file", ".", "Macro files (*.xml);;All files(*)");
+          if (!macroFile.isEmpty())
+              UserActionManager::instance()->loadMacro(macroFile);
+    }
+
+    void MainWindow::handleActionMacroStep()
+    {
+        UserActionManager::instance()->nextMacroStep();
     }
 
     void MainWindow::handleActionUndo()

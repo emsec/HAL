@@ -18,7 +18,9 @@ namespace hal
 
     UserActionManager::UserActionManager(QObject *parent)
         : QObject(parent), mStartRecording(-1),
-          mWaitCount(0), mRecordHashAttribute(true),
+          mWaitCount(0), mNextSingleStep(-1),
+          mRecordHashAttribute(true),
+          mExecutingMacro(false),
           mDumpAction(nullptr)
     {
         mElapsedTime.start();
@@ -43,7 +45,12 @@ namespace hal
 
     void UserActionManager::addExecutedAction(UserAction* act)
     {
-        mActionHistory.append(act);
+        if (!mExecutingMacro)
+        {
+            if (mNextSingleStep >= 0)
+                endSingleStepMode();
+            mActionHistory.append(act);
+        }
 
         if (mSettingDumpAction->value().toBool())
         {
@@ -106,11 +113,78 @@ namespace hal
         mStartRecording = -1;
     }
 
+    void UserActionManager::endSingleStepMode()
+    {
+        mNextSingleStep = -1;
+        Q_EMIT(canExecuteMacroStep(false));
+    }
+
+    void UserActionManager::nextMacroStep()
+    {
+        if (mNextSingleStep < 0) return;
+
+        mExecutingMacro = true;
+        UserAction* act = mActionHistory.at(mNextSingleStep);
+        if (!act->exec())
+        {
+            log_warning("gui", "failed to execute user action {}", act->tagname().toStdString());
+            endSingleStepMode();
+            mExecutingMacro = false;
+            return;
+        }
+        if (act->isWaitForReady()) mWaitCount=100;
+        while (mWaitCount > 0)
+        {
+            --mWaitCount;
+            QCoreApplication::processEvents();
+            QThread::msleep(10);
+        }
+        if (++mNextSingleStep >= mActionHistory.size())
+            endSingleStepMode();
+        mExecutingMacro = false;
+    }
+
+    void UserActionManager::loadMacro(const QString& macroFilename)
+    {
+        if (!loadMacroInternal(macroFilename)) return;
+        if (mStartRecording >= 0)
+        {
+            mNextSingleStep = mStartRecording;
+            mStartRecording = -1;
+            Q_EMIT(canExecuteMacroStep(true));
+        }
+    }
+
     void UserActionManager::playMacro(const QString& macroFilename)
+    {
+        if (!loadMacroInternal(macroFilename)) return;
+        int endMacro = mActionHistory.size();
+        mExecutingMacro = true;
+        for (int i=mStartRecording; i<endMacro; i++)
+        {
+            UserAction* act = mActionHistory.at(i);
+            if (!act->exec())
+            {
+                log_warning("gui", "failed to execute user action {}", act->tagname().toStdString());
+                break;
+            }
+            if (act->isWaitForReady()) mWaitCount=100;
+            while (mWaitCount > 0)
+            {
+                --mWaitCount;
+                QCoreApplication::processEvents();
+                QThread::msleep(10);
+            }
+        }
+        mExecutingMacro = false;
+        mStartRecording = -1;
+    }
+
+    bool UserActionManager::loadMacroInternal(const QString &macroFilename)
     {
         QFile ff(macroFilename);
         bool parseActions = false;
-        if (!ff.open(QIODevice::ReadOnly)) return;
+        if (!ff.open(QIODevice::ReadOnly)) return false;
         QXmlStreamReader xmlIn(&ff);
         mStartRecording = mActionHistory.size();
         while (!xmlIn.atEnd())
@@ -119,6 +193,7 @@ namespace hal
             {
                 if (xmlIn.isStartElement())
                 {
+                    qDebug() << "startElement" << xmlIn.name() << parseActions;
                     if (xmlIn.name() == "actions")
                         parseActions = true;
                     else if (parseActions)
@@ -132,33 +207,11 @@ namespace hal
                     if (xmlIn.name() == "actions")
                         parseActions = false;
                 }
-             }
-        }
-        if (xmlIn.hasError())
-        {
-            // TODO : error message
-            return;
+            }
         }
 
-        int endMacro = mActionHistory.size();
-        for (int i=mStartRecording; i<endMacro; i++)
-        {
-            UserAction* act = mActionHistory.at(i);
-            if (!act->exec())
-            {
-                log_warning("gui", "failed to execute user action {}", act->tagname().toStdString());
-                break;
-            }
-            if (act->isWaitForReady()) mWaitCount=100;
-            while (mWaitCount > 0)
-            {
-                --mWaitCount;
-                qDebug() << "wait" << mWaitCount;
-                QCoreApplication::processEvents();
-                QThread::msleep(10);
-            }
-        }
-        mStartRecording = -1;
+        return !xmlIn.hasError();             // TODO : error message
+
     }
 
     UserAction* UserActionManager::getParsedAction(QXmlStreamReader& xmlIn) const
