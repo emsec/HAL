@@ -537,10 +537,10 @@ namespace hal
         Node nodeToMove;
         QPoint sourceLayouterPos;
 
-        if (gSelectionRelay->mSelectedGates.size() == 1 && gSelectionRelay->mSelectedModules.size() == 0)
+        if (gSelectionRelay->numberSelectedGates() == 1 && gSelectionRelay->numberSelectedModules() == 0)
         {
             // take the selected gate
-            u32 id = *gSelectionRelay->mSelectedGates.begin();
+            u32 id = *gSelectionRelay->selectedGates().begin();
             for (QMap<QPoint,Node>::iterator it = nodeMap.begin(); it != nodeMap.end(); ++it)
             {
                 if (it.value().type() == Node::Gate && it.value().id() == id) {
@@ -550,10 +550,10 @@ namespace hal
                 }
             }
         }
-        else if (gSelectionRelay->mSelectedGates.size() == 0 && gSelectionRelay->mSelectedModules.size() == 1)
+        else if (gSelectionRelay->numberSelectedGates() == 0 && gSelectionRelay->numberSelectedModules() == 1)
         {
             // take the selected module
-            u32 id = *gSelectionRelay->mSelectedModules.begin();
+            u32 id = *gSelectionRelay->selectedModules().begin();
             for (QMap<QPoint,Node>::iterator it = nodeMap.begin(); it != nodeMap.end(); ++it)
             {
                 if (it.value().type() == Node::Module && it.value().id() == id) {
