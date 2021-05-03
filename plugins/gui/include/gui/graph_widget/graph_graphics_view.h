@@ -115,8 +115,6 @@ namespace hal
 
         void handleNodeMove(u32 direction);
 
-        void handleNodeMove(u32 direction);
-
     private:
         void paintEvent(QPaintEvent* event) override;
         void drawForeground(QPainter* painter, const QRectF& rect) override;
