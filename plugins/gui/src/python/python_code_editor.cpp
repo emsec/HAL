@@ -5,11 +5,16 @@
 #include "hal_core/utilities/log.h"
 #include "gui/gui_globals.h"
 
+#include "gui/user_action/action_python_text_changed.h"
+
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QTextDocumentFragment>
 #include <QVBoxLayout>
 #include <QShortcut>
+
+//Debug
+#include <QDebug>
 
 namespace hal
 {
@@ -17,8 +22,15 @@ namespace hal
     {
         QShortcut* redo_shortcut = new QShortcut(QKeySequence(tr("Ctrl+y")), this);
         connect(redo_shortcut, &QShortcut::activated, this, &PythonCodeEditor::handleRedoRequested);
+        connect(this, &QPlainTextEdit::textChanged, this, &PythonCodeEditor::handleTextChanged);
 
         mBaseFileModified = false;
+    }
+
+    void PythonCodeEditor::handleTextChanged()
+    {
+        ActionPythonTextChanged* act = new ActionPythonTextChanged(toPlainText());
+        act->exec();
     }
 
     void PythonCodeEditor::keyPressEvent(QKeyEvent* e)

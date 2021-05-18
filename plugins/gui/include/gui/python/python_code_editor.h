@@ -94,6 +94,9 @@ namespace hal
          */
         QUuid getUuid() const;
 
+    private Q_SLOTS:
+        void handleTextChanged();
+
     Q_SIGNALS:
         /**
          * Q_SIGNAL that is emitted after a key was pressed within the code editor. <br>
