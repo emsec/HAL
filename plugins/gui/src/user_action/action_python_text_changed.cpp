@@ -41,11 +41,13 @@ namespace hal
         Q_ASSERT(uam);
         if (uam->mActionHistory.isEmpty()) return false;
         UserAction* lastAction = uam->mActionHistory.last();
-        if (uam->timeStamp() - lastAction->timeStamp() > sRecentTextChangeMsec) return false;
+        qint64 msecSinceLastAction = uam->timeStamp() - lastAction->timeStamp();
+        if (msecSinceLastAction > sRecentTextChangeMsec) return false;
         ActionPythonTextChanged* lastTextChanged = dynamic_cast<ActionPythonTextChanged*>(lastAction);
         if (!lastTextChanged) return false;
-        lastTextChanged->mText = mText;
-        lastTextChanged->mDuration = uam->timeStamp() - lastAction->timeStamp();
+        lastTextChanged->mTimeStamp = uam->timeStamp();
+        lastTextChanged->mText      = mText;
+        lastTextChanged->mDuration += msecSinceLastAction;
         return true;
     }
 
