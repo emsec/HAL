@@ -31,6 +31,8 @@ namespace hal
     {
         ActionPythonTextChanged* act = new ActionPythonTextChanged(toPlainText());
         act->exec();
+        if (act->wasMergedWithRecent())
+            delete act;
     }
 
     void PythonCodeEditor::keyPressEvent(QKeyEvent* e)

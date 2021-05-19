@@ -43,6 +43,8 @@ namespace hal
      */
     class UserActionManager : public QObject
     {
+        friend class ActionPythonTextChanged;  // needs access to action history
+
         Q_OBJECT
     public:
         /// get singleton instance
