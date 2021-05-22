@@ -92,6 +92,9 @@ namespace hal
 
         /// dump actions from beginning
         void crashDump(int sig);
+
+        /// true, if action is triggered by user; false, if macro is executed or undo executed
+        bool isUserTriggeredAction() const;
     private:
         UserActionManager(QObject *parent = nullptr);
 
@@ -107,6 +110,7 @@ namespace hal
         QElapsedTimer mElapsedTime;
         bool mRecordHashAttribute;
         bool mExecutingMacro;
+        bool mExecutingUndo;
 
         static UserActionManager* inst;
         QPlainTextEdit* mDumpAction;

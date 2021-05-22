@@ -1,4 +1,5 @@
 #include "gui/python/python_code_editor.h"
+#include "gui/python/python_editor.h"
 #include "gui/python/python_editor_code_completion_dialog.h"
 
 #include "gui/code_editor/syntax_highlighter/python_syntax_highlighter.h"
@@ -12,13 +13,14 @@
 #include <QTextDocumentFragment>
 #include <QVBoxLayout>
 #include <QShortcut>
+#include <QTabWidget>
 
 //Debug
 #include <QDebug>
 
 namespace hal
 {
-    PythonCodeEditor::PythonCodeEditor(QWidget *parent) : CodeEditor(parent), mUuid(QUuid::createUuid())
+    PythonCodeEditor::PythonCodeEditor(QWidget *parent) : CodeEditor(parent), mOldPlaintext(""), mUuid(QUuid::createUuid())
     {
         QShortcut* redo_shortcut = new QShortcut(QKeySequence(tr("Ctrl+y")), this);
         connect(redo_shortcut, &QShortcut::activated, this, &PythonCodeEditor::handleRedoRequested);
@@ -29,10 +31,14 @@ namespace hal
 
     void PythonCodeEditor::handleTextChanged()
     {
-        ActionPythonTextChanged* act = new ActionPythonTextChanged(toPlainText());
-        act->exec();
-        if (act->wasMergedWithRecent())
-            delete act;
+        if(UserActionManager::instance()->isUserTriggeredAction())
+        {
+            ActionPythonTextChanged* act = new ActionPythonTextChanged(mOldPlaintext, toPlainText());
+            act->setPythonCodeEditorUUID(mUuid);
+            act->exec();
+            if (act->wasMergedWithRecent())
+                delete act;
+        }
     }
 
     void PythonCodeEditor::keyPressEvent(QKeyEvent* e)
@@ -341,5 +347,27 @@ namespace hal
     QUuid PythonCodeEditor::getUuid() const
     {
         return mUuid;
+    }
+
+    void PythonCodeEditor::setOldPlainText(const QString &oldText)
+    {
+        mOldPlaintext = oldText;
+    }
+
+    PythonCodeEditor* PythonCodeEditor::getPythonCodeEditorByUUID(const QUuid &uuid)
+    {
+        QTabWidget* qTabWidget = gContentManager->getPythonEditorWidget()->getTabWidget();
+        int openTabs = qTabWidget->count();
+        PythonCodeEditor* pythonCodeEditor;
+        for(int i = 0; i < openTabs; i++)
+        {
+            QWidget* qWidget = qTabWidget->widget(i);
+            pythonCodeEditor = dynamic_cast<PythonCodeEditor*>(qWidget);
+            if (!pythonCodeEditor) continue;
+            if(uuid == pythonCodeEditor->getUuid()) {
+                return pythonCodeEditor;
+            }
+        }
+        return NULL;
     }
 }

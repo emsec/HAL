@@ -44,8 +44,8 @@ namespace hal
     }
 
     void UserActionManager::addExecutedAction(UserAction* act)
-    {
-        if (!mExecutingMacro)
+    {      
+        if (isUserTriggeredAction())
         {
             if (mNextSingleStep >= 0)
                 endSingleStepMode();
@@ -292,11 +292,18 @@ namespace hal
             undoList.append(lastAction->undoAction());
             if (lastAction->compoundOrder() <= 0) break;
         }
-        int n = mActionHistory.size();
+        mExecutingUndo = true;
         for (UserAction* act : undoList)
             act->exec();
-        while (mActionHistory.size() > n)
-            mActionHistory.takeLast();
+        mExecutingUndo = false;
         testUndo();
+    }
+
+    bool UserActionManager::isUserTriggeredAction() const
+    {
+        if(mExecutingMacro || mExecutingUndo) {
+            return false;
+        }
+        return true;
     }
 }

@@ -94,6 +94,20 @@ namespace hal
          */
         QUuid getUuid() const;
 
+        /**
+         * Set the old plaintext for the undo action.
+         *
+         * @param oldText - the old plaintext
+         */
+        void setOldPlainText(const QString &oldText);
+
+        /**
+         * Get PythonCodeEditorInstance by uuid
+         *
+         * @param uuid - the uuid we are looking for
+         */
+        static PythonCodeEditor* getPythonCodeEditorByUUID(const QUuid &uuid);
+
     private Q_SLOTS:
         void handleTextChanged();
 
@@ -193,6 +207,7 @@ namespace hal
 
         QString mFileName;
         QString mTextState;
+        QString mOldPlaintext;
 
         bool mBaseFileModified;
 

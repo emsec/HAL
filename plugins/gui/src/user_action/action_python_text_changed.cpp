@@ -1,4 +1,8 @@
 #include "gui/user_action/action_python_text_changed.h"
+#include <QDebug>
+#include <QTabWidget>
+#include "gui/gui_globals.h"
+#include "gui/python/python_editor.h"
 
 namespace hal
 {
@@ -20,8 +24,8 @@ namespace hal
     // maximum duration for single text change 10 sec
     qint64 ActionPythonTextChanged::sRecentTextChangeMsec = 10000;
 
-    ActionPythonTextChanged::ActionPythonTextChanged(const QString &text_)
-        : mText(text_), mMerged(false), mDuration(0)
+    ActionPythonTextChanged::ActionPythonTextChanged(const QString &oldtext_, const QString &text_)
+        : mOldText(oldtext_), mText(text_), mMerged(false), mDuration(0)
     {;}
 
     bool ActionPythonTextChanged::exec()
@@ -31,6 +35,28 @@ namespace hal
             // caller should delete this action to avoid memory leak
             mMerged = true;
             return true;
+        }
+        if(!mUndoAction) {
+            mUndoAction = new ActionPythonTextChanged("", mText);
+            dynamic_cast<ActionPythonTextChanged*>(mUndoAction)->setPythonCodeEditorUUID(mPythonCodeEditorUUID);
+        }
+
+        if(UserActionManager::instance()->isUserTriggeredAction()) {
+            // TODO remove
+            /* qDebug() << QString("UserAction triggered is an user triggered action");
+            qDebug() << mText;
+            qDebug() << mOldText;
+            qDebug() << mPythonCodeEditorUUID; */
+            PythonCodeEditor* pythonCodeEditor = PythonCodeEditor::getPythonCodeEditorByUUID(mPythonCodeEditorUUID);
+            pythonCodeEditor->setOldPlainText(mText);
+        } else {
+            // TODO remove
+            /* qDebug() << QString("UserAction triggered is no user triggered action");
+            qDebug() << mText;
+            qDebug() << mOldText;
+            qDebug() << mPythonCodeEditorUUID; */
+            PythonCodeEditor* pythonCodeEditor = PythonCodeEditor::getPythonCodeEditorByUUID(mPythonCodeEditorUUID);
+            pythonCodeEditor->setPlainText(mText);
         }
         return UserAction::exec();
     }
@@ -45,6 +71,7 @@ namespace hal
         if (msecSinceLastAction > sRecentTextChangeMsec) return false;
         ActionPythonTextChanged* lastTextChanged = dynamic_cast<ActionPythonTextChanged*>(lastAction);
         if (!lastTextChanged) return false;
+        if (lastTextChanged->mPythonCodeEditorUUID != mPythonCodeEditorUUID) return false;
         lastTextChanged->mTimeStamp = uam->timeStamp();
         lastTextChanged->mText      = mText;
         lastTextChanged->mDuration += msecSinceLastAction;
@@ -70,5 +97,10 @@ namespace hal
             if (xmlIn.name() == "pythonscript")
                 mText = xmlIn.readElementText();
         }
+    }
+
+    void ActionPythonTextChanged::setPythonCodeEditorUUID(QUuid &uuid_)
+    {
+         mPythonCodeEditorUUID = uuid_;
     }
 }

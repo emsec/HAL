@@ -1,5 +1,6 @@
 #pragma once
 #include "user_action.h"
+#include "gui/python/python_code_editor.h"
 
 namespace hal
 {
@@ -8,7 +9,9 @@ namespace hal
      */
     class ActionPythonTextChanged : public UserAction
     {
+        QString mOldText;
         QString mText;
+        QUuid mPythonCodeEditorUUID;
 
         bool mMerged;
 
@@ -20,7 +23,7 @@ namespace hal
         // maximum duration in msec for single text change
         static qint64 sRecentTextChangeMsec;
     public:
-        ActionPythonTextChanged(const QString& text_ = QString());
+        ActionPythonTextChanged(const QString& oldtext_ = QString(), const QString& text_ = QString());
         QString tagname() const override;
         bool exec() override;
         void writeToXml(QXmlStreamWriter& xmlOut) const override;
@@ -29,6 +32,8 @@ namespace hal
 
         // needs to be deleted by caller since action was merged and not executed
         bool wasMergedWithRecent() const {return mMerged; }
+
+        void setPythonCodeEditorUUID(QUuid &uuid_);
     };
 
     /**

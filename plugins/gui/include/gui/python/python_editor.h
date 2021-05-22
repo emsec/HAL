@@ -100,7 +100,7 @@ namespace hal
         virtual void clear() override;
 
         /**
-         * Action to open a file. A dialogue will appear where the user can select the .py file he want to open. <br>
+         * Action to open a file. A dialogue will appear where the user can select the .py file he wants to open. <br>
          * In case the user opens an already open file the user is ask whether the changes should be overwritten or not.
          */
         void handleActionOpenFile();
