@@ -30,6 +30,11 @@ namespace hal
 
     bool ActionPythonTextChanged::exec()
     {
+        if(UserActionManager::instance()->isUserTriggeredAction()) {
+            PythonCodeEditor* pythonCodeEditor = PythonCodeEditor::getPythonCodeEditorByUUID(mPythonCodeEditorUUID);
+            pythonCodeEditor->setOldPlainText(mText);
+        }
+
         if (mergeWithRecent())
         {
             // caller should delete this action to avoid memory leak
@@ -41,21 +46,15 @@ namespace hal
             dynamic_cast<ActionPythonTextChanged*>(mUndoAction)->setPythonCodeEditorUUID(mPythonCodeEditorUUID);
         }
 
-        if(UserActionManager::instance()->isUserTriggeredAction()) {
-            // TODO remove
-            /* qDebug() << QString("UserAction triggered is an user triggered action");
-            qDebug() << mText;
-            qDebug() << mOldText;
-            qDebug() << mPythonCodeEditorUUID; */
+        if(!UserActionManager::instance()->isUserTriggeredAction()) {
             PythonCodeEditor* pythonCodeEditor = PythonCodeEditor::getPythonCodeEditorByUUID(mPythonCodeEditorUUID);
-            pythonCodeEditor->setOldPlainText(mText);
-        } else {
-            // TODO remove
-            /* qDebug() << QString("UserAction triggered is no user triggered action");
-            qDebug() << mText;
-            qDebug() << mOldText;
-            qDebug() << mPythonCodeEditorUUID; */
-            PythonCodeEditor* pythonCodeEditor = PythonCodeEditor::getPythonCodeEditorByUUID(mPythonCodeEditorUUID);
+            // workaround, if we are playing a macro the uuid of the python code editor is unknown
+            // TODO remove we are always using the current widget
+            if(!pythonCodeEditor) {
+                QTabWidget* qTabWidget = gContentManager->getPythonEditorWidget()->getTabWidget();
+                pythonCodeEditor = dynamic_cast<PythonCodeEditor*>(qTabWidget->currentWidget());
+                if(!pythonCodeEditor) return false;
+            }
             pythonCodeEditor->setPlainText(mText);
         }
         return UserAction::exec();
