@@ -16,6 +16,12 @@
 #include "gui/settings/settings_items/settings_item_keybind.h"
 #include "gui/settings/settings_items/settings_item_spinbox.h"
 
+#include "gui/user_action/action_python_open_file.h"
+#include "gui/user_action/action_python_execute_file.h"
+#include "gui/user_action/action_python_new_tab.h"
+#include "gui/user_action/action_python_save_file.h"
+#include "gui/user_action/action_python_tab_changed.h"
+
 #include <QAction>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -347,6 +353,12 @@ namespace hal
 
     void PythonEditor::handleCurrentTabChanged(int index)
     {
+        if(UserActionManager::instance()->isUserTriggeredAction())
+        {
+            ActionPythonTabChanged* act = new ActionPythonTabChanged(index);
+            act->exec();
+        }
+
         Q_UNUSED(index)
 
         if (!mTabWidget->currentWidget())
@@ -463,7 +475,8 @@ namespace hal
             }
 
             handleActionNewTab();
-            tabLoadFile(mTabWidget->count() - 1, fileName);
+            ActionPythonOpenFile* act = new ActionPythonOpenFile(mTabWidget->count() - 1, fileName);
+            act->exec();
         }
 
         mLastOpenedPath = QFileInfo(file_names.last()).absolutePath();
@@ -546,6 +559,17 @@ namespace hal
             // Remove an existing snapshot
             removeSnapshotFile(current_editor);
         }
+
+        ActionPythonSaveFile* act = new ActionPythonSaveFile(index, selected_file_name);
+        return act->exec();
+    }
+
+    bool PythonEditor::execSaveFile(int index, QString selected_file_name)
+    {
+        PythonCodeEditor* current_editor = dynamic_cast<PythonCodeEditor*>(mTabWidget->widget(index));
+
+        if (!current_editor)
+            return false;
 
         mFileWatcher->removePath(current_editor->getFileName());
         mPathEditorMap.remove(current_editor->getFileName());
@@ -645,6 +669,12 @@ namespace hal
 
     void PythonEditor::handleActionRun()
     {
+        ActionPythonExecuteFile* act = new ActionPythonExecuteFile();
+        act->exec();
+    }
+
+    void PythonEditor::runScript()
+    {
         // Update snapshots when clicking on run
         this->updateSnapshots();
 
@@ -662,6 +692,12 @@ namespace hal
     }
 
     void PythonEditor::handleActionNewTab()
+    {
+        ActionPythonNewTab* act = new ActionPythonNewTab();
+        act->exec();
+    }
+
+    void PythonEditor::newTab()
     {
         PythonCodeEditor* editor = new PythonCodeEditor();
         editor->setFontSize(mSettingFontSize->value().toInt());

@@ -120,11 +120,13 @@ namespace hal
          * Action to execute the python script of the currently selected code editor (open tab).
          */
         void handleActionRun();
+        void runScript();
 
         /**
          * Action to create an empty new tab.
          */
         void handleActionNewTab();
+        void newTab();
 
         /**
          * Action to create the menu when right-clicking on a tab. There the user may choose to close certain tabs or
@@ -187,9 +189,11 @@ namespace hal
          *
          * @param ask_path - Ask the user for a new save location
          * @param index - The tab index
+         * @param selected_file_name - Option to pass a file name, for example if UserAction is called
          * @returns true if the tab was saved
          */
         bool saveFile(const bool ask_path, int index = -1);
+        bool execSaveFile(const int index, const QString selected_file_name);
 
         /**
          * Close the tab given by its index. It will discard all unsaved changes of this tab without asking.
