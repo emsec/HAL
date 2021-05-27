@@ -25,7 +25,7 @@ namespace hal
     qint64 ActionPythonTextChanged::sRecentTextChangeMsec = 10000;
 
     ActionPythonTextChanged::ActionPythonTextChanged(const QString &oldtext_, const QString &text_)
-        : mOldText(oldtext_), mText(text_), mMerged(false), mDuration(0)
+        : mOldText(oldtext_), mText(text_), mLastKeyIsReturn(false), mMerged(false), mDuration(0)
     {;}
 
     bool ActionPythonTextChanged::exec()
@@ -62,6 +62,8 @@ namespace hal
 
     bool ActionPythonTextChanged::mergeWithRecent()
     {
+        if(mLastKeyIsReturn) return false;
+
         UserActionManager* uam = UserActionManager::instance();
         Q_ASSERT(uam);
         if (uam->mActionHistory.isEmpty()) return false;
@@ -101,5 +103,10 @@ namespace hal
     void ActionPythonTextChanged::setPythonCodeEditorUUID(QUuid &uuid_)
     {
          mPythonCodeEditorUUID = uuid_;
+    }
+
+    void ActionPythonTextChanged::setLastKeyIsReturn()
+    {
+        mLastKeyIsReturn = true;
     }
 }

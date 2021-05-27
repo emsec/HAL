@@ -35,6 +35,7 @@ namespace hal
         {
             ActionPythonTextChanged* act = new ActionPythonTextChanged(mOldPlaintext, toPlainText());
             act->setPythonCodeEditorUUID(mUuid);
+            if(mLastKeyPressed == Qt::Key_Return) act->setLastKeyIsReturn();
             act->exec();
             if (act->wasMergedWithRecent())
                 delete act;
@@ -44,6 +45,9 @@ namespace hal
     void PythonCodeEditor::keyPressEvent(QKeyEvent* e)
     {
         Q_EMIT keyPressed(e);
+
+        mLastKeyPressed = e->key();
+
         if (textCursor().hasSelection() && !(e->key() == Qt::Key_Tab || e->key() == Qt::Key_Backtab))
         {
             QPlainTextEdit::keyPressEvent(e);

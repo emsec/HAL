@@ -217,6 +217,8 @@ namespace hal
         QString mTextState;
         QString mOldPlaintext;
 
+        int mLastKeyPressed;
+
         bool mBaseFileModified;
 
         QUuid mUuid;

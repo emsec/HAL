@@ -13,6 +13,7 @@ namespace hal
         QString mText;
         QUuid mPythonCodeEditorUUID;
 
+        bool mLastKeyIsReturn;
         bool mMerged;
 
         qint64 mDuration;
@@ -34,6 +35,8 @@ namespace hal
         bool wasMergedWithRecent() const {return mMerged; }
 
         void setPythonCodeEditorUUID(QUuid &uuid_);
+
+        void setLastKeyIsReturn();
     };
 
     /**
