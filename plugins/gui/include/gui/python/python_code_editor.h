@@ -24,6 +24,7 @@
 #pragma once
 
 #include "gui/code_editor/code_editor.h"
+#include "hal_core/defines.h"
 
 #include <QUuid>
 
@@ -49,7 +50,7 @@ namespace hal
          *
          * @param parent - The parent widget
          */
-        PythonCodeEditor(QWidget* parent = nullptr);
+        PythonCodeEditor(u32 id, QWidget* parent = nullptr);
 
         /**
          * Get the absolute path of the file the editor works with.
@@ -107,6 +108,13 @@ namespace hal
          * @param uuid - the uuid we are looking for
          */
         static PythonCodeEditor* getPythonCodeEditorByUUID(const QUuid &uuid);
+
+        /**
+         * Getter for unique ID
+         *
+         * @return mId
+         */
+        u32 id() const;
 
     private Q_SLOTS:
         void handleTextChanged();
@@ -203,7 +211,7 @@ namespace hal
          */
         void performCodeCompletion(std::tuple<std::string, std::string> completion);
 
-
+        u32 mId;
 
         QString mFileName;
         QString mTextState;

@@ -416,6 +416,13 @@ namespace hal
          */
         bool handleDeserializationFromHalFile(const std::filesystem::path& path, Netlist* netlist, rapidjson::Document& document);
 
+        /**
+         * Get PythonCodeEditor by unique Id
+         *
+         * @return PythonCodeEditor or nullptr
+         */
+        PythonCodeEditor* getPythonCodeEditorById(u32 id);
+
     Q_SIGNALS:
         void forwardStdout(const QString& output);
         void forwardError(const QString& output);
@@ -626,6 +633,11 @@ namespace hal
          * @param original_path
          */
         void removeSnapshotFile(PythonCodeEditor* editor) const;
+
+        /**
+         * Holds max UID of python code editors
+         */
+        u32 mMaxPythonCodeEditorId;
 
         QVBoxLayout* mLayout;
         Toolbar* mToolbar;

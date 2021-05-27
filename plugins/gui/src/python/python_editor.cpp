@@ -44,6 +44,7 @@ namespace hal
         : ContentWidget("Python Editor", parent), PythonContextSubscriber(), mSearchbar(new Searchbar()), mActionOpenFile(new Action(this)), mActionRun(new Action(this)),
           mActionSave(new Action(this)), mActionSaveAs(new Action(this)), mActionToggleMinimap(new Action(this)), mActionNewFile(new Action(this))
     {
+        mMaxPythonCodeEditorId = 0;
         ensurePolished();
         mNewFileCounter = 0;
         mLastClickTime  = 0;
@@ -182,7 +183,7 @@ namespace hal
             "Keybind for creating a new python file in the Python Editor."
         );
 
-        handleActionNewTab();
+        newTab();
 
         using namespace std::placeholders;
         hal_file_manager::register_on_serialize_callback("PythonEditor", std::bind(&PythonEditor::handleSerializationToHalFile, this, _1, _2, _3));
@@ -474,7 +475,7 @@ namespace hal
                 }
             }
 
-            handleActionNewTab();
+            newTab();
             ActionPythonOpenFile* act = new ActionPythonOpenFile(mTabWidget->count() - 1, fileName);
             act->exec();
         }
@@ -699,7 +700,7 @@ namespace hal
 
     void PythonEditor::newTab()
     {
-        PythonCodeEditor* editor = new PythonCodeEditor();
+        PythonCodeEditor* editor = new PythonCodeEditor(++mMaxPythonCodeEditorId);
         editor->setFontSize(mSettingFontSize->value().toInt());
         editor->setMinimapEnabled(mSettingMinimap->value().toBool());
         editor->setLineWrapEnabled(mSettingLineWrap->value().toBool());
@@ -929,7 +930,7 @@ namespace hal
         {
             QFileInfo original_path(snapshot_original_path);
             bool load_snapshot = decideLoadSnapshot(saved_snapshots, original_path);
-            handleActionNewTab();
+            newTab();
             int tab_idx = mTabWidget->count() - 1;
             tabLoadFile(tab_idx, original_path.filePath());
             if(load_snapshot)
@@ -943,7 +944,7 @@ namespace hal
         // Load snapshots of unsaved tabs
         for (QString snapshot_content : unsaved_snapshots)
         {
-            this->handleActionNewTab();
+            this->newTab();
             this->setSnapshotContent(mTabWidget->count() - 1, snapshot_content);
         }
         updateSnapshots();
@@ -960,7 +961,7 @@ namespace hal
             discardTab(0);
         mNewFileCounter = 0;
         mLastClickTime  = 0;
-        handleActionNewTab();
+        newTab();
     }
 
     bool PythonEditor::eventFilter(QObject* obj, QEvent* event)
@@ -1440,5 +1441,21 @@ namespace hal
             else
                 this->setFocus();
         }
+    }
+
+    PythonCodeEditor* PythonEditor::getPythonCodeEditorById(u32 id)
+    {
+        QTabWidget* qTabWidget = gContentManager->getPythonEditorWidget()->getTabWidget();
+        int openTabs = qTabWidget->count();
+        for(int i = 0; i < openTabs; i++)
+        {
+            QWidget* qWidget = qTabWidget->widget(i);
+            PythonCodeEditor* pythonCodeEditor = dynamic_cast<PythonCodeEditor*>(qWidget);
+            if (!pythonCodeEditor) continue;
+            if(id == pythonCodeEditor->id()) {
+                return pythonCodeEditor;
+            }
+        }
+        return nullptr;
     }
 }
