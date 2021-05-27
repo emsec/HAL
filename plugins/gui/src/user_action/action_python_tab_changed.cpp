@@ -34,12 +34,12 @@ namespace hal
 
     void ActionPythonTabChanged::addToHash(QCryptographicHash& cryptoHash) const
     {
-        cryptoHash.addData(QString(mNewIndex).toUtf8());
+        cryptoHash.addData(QByteArray::number(mNewIndex));
     }
 
     void ActionPythonTabChanged::writeToXml(QXmlStreamWriter& xmlOut) const
     {
-        xmlOut.writeTextElement("index", QString(mNewIndex));
+        xmlOut.writeTextElement("index", QString::number(mNewIndex));
     }
 
     void ActionPythonTabChanged::readFromXml(QXmlStreamReader& xmlIn)
