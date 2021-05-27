@@ -3,6 +3,7 @@
 #include "gui/action/action.h"
 #include "gui/content_manager/content_manager.h"
 #include "gui/docking_system/dock_bar.h"
+#include "gui/export/export_registered_format.h"
 #include "gui/file_manager/file_manager.h"
 #include "gui/graphics_effects/overlay_effect.h"
 #include "gui/gui_def.h"
@@ -25,12 +26,12 @@
 #include "hal_core/netlist/net.h"
 #include "hal_core/netlist/netlist.h"
 #include "hal_core/netlist/netlist_factory.h"
+#include "hal_core/netlist/netlist_writer/netlist_writer_manager.h"
 #include "hal_core/netlist/persistent/netlist_serializer.h"
 #include "hal_core/utilities/log.h"
 
 #include <QApplication>
 #include <QCloseEvent>
-#include <QDebug>
 #include <QDesktopWidget>
 #include <QFileDialog>
 #include <QFuture>
@@ -39,6 +40,8 @@
 #include <QPushButton>
 #include <QShortcut>
 #include <QtConcurrent>
+#include <QRegExp>
+#include <QStringList>
 
 namespace hal
 {
@@ -159,7 +162,7 @@ namespace hal
         mActionNew->setIcon(gui_utility::getStyledSvgIcon(mNewFileIconStyle, mNewFileIconPath));
         mActionOpen->setIcon(gui_utility::getStyledSvgIcon(mOpenIconStyle, mOpenIconPath));
         mActionSave->setIcon(gui_utility::getStyledSvgIcon(mSaveIconStyle, mSaveIconPath));
-        mActionSaveAs->setIcon(gui_utility::getStyledSvgIcon(mSaveIconStyle, mSaveIconPath));
+        mActionSaveAs->setIcon(gui_utility::getStyledSvgIcon(mSaveAsIconStyle, mSaveAsIconPath));
         mActionUndo->setIcon(gui_utility::getStyledSvgIcon(mUndoIconStyle, mUndoIconPath));
         mActionSettings->setIcon(gui_utility::getStyledSvgIcon(mSettingsIconStyle, mSettingsIconPath));
 
@@ -177,6 +180,31 @@ namespace hal
         mMenuFile->addAction(mActionClose);
         mMenuFile->addAction(mActionSave);
         mMenuFile->addAction(mActionSaveAs);
+
+        QMenu* menuExport = nullptr;
+        for (auto it : netlist_writer_manager::get_writer_extensions())
+        {
+            if (it.second.empty()) continue; // no extensions registered
+
+            QString label = QString::fromStdString(it.first);
+            QRegExp re("Default (.*) Writer", Qt::CaseInsensitive);
+            QString txt = (re.indexIn(label) < 0)
+                    ? label.remove(QChar(':'))
+                    : QString("Export as ") + re.cap(1);
+
+            QStringList extensions;
+            extensions.append(txt);
+            for (std::string ex : it.second)
+                extensions.append(QString::fromStdString(ex));
+
+            if (!menuExport) menuExport = new QMenu("Export …", this);
+            Action* action = new Action(txt, this);
+            action->setData(extensions);
+            connect(action, &QAction::triggered, this, &MainWindow::handleActionExport);
+            menuExport->addAction(action);
+        }
+        if (menuExport) mMenuFile->addMenu(menuExport);
+
         mMenuEdit->addAction(mActionUndo);
         mMenuEdit->addSeparator();
         mMenuEdit->addAction(mActionSettings);
@@ -191,6 +219,7 @@ namespace hal
         mLeftToolBar->addAction(mActionNew);
         mLeftToolBar->addAction(mActionOpen);
         mLeftToolBar->addAction(mActionSave);
+        mLeftToolBar->addAction(mActionSaveAs);
         mLeftToolBar->addAction(mActionUndo);
         mRightToolBar->addAction(mActionSettings);
 
@@ -220,7 +249,6 @@ namespace hal
         mMenuMacro->setTitle("Macro");
         mMenuHelp->setTitle("Help");
 
-        mAboutDialog = new AboutDialog(this);
         mPluginModel = new PluginModel(this);
 
         gPythonContext = std::make_unique<PythonContext>();
@@ -254,7 +282,7 @@ namespace hal
 
         connect(mActionNew, &Action::triggered, this, &MainWindow::handleActionNew);
         connect(mActionOpen, &Action::triggered, this, &MainWindow::handleActionOpen);
-        connect(mActionAbout, &Action::triggered, mAboutDialog, &AboutDialog::exec);
+        connect(mActionAbout, &Action::triggered, this, &MainWindow::handleActionAbout);
         //        connect(mActionSchedule, &Action::triggered, this, &MainWindow::toggleSchedule);
         connect(mActionSettings, &Action::triggered, this, &MainWindow::toggleSettings);
         connect(mSettings, &MainSettingsWidget::close, this, &MainWindow::closeSettings);
@@ -273,7 +301,7 @@ namespace hal
                 this,
                 &MainWindow::handleActionUndo);    //        connect(mActionRunSchedule, &Action::triggered, PluginScheduleManager::get_instance(), &PluginScheduleManager::runSchedule);
 
-        connect(this, &MainWindow::saveTriggered, gContentManager, &ContentManager::handleSaveTriggered);
+        //connect(this, &MainWindow::saveTriggered, gContentManager, &ContentManager::handleSaveTriggered);
         connect(this, &MainWindow::saveTriggered, gGraphContextManager, &GraphContextManager::handleSaveTriggered);
 
         connect(UserActionManager::instance(), &UserActionManager::canUndoLastAction, this, &MainWindow::enableUndo);
@@ -353,6 +381,16 @@ namespace hal
         return mSaveIconStyle;
     }
 
+    QString MainWindow::saveAsIconPath() const
+    {
+        return mSaveAsIconPath;
+    }
+
+    QString MainWindow::saveAsIconStyle() const
+    {
+        return mSaveAsIconStyle;
+    }
+
     QString MainWindow::settingsIconPath() const
     {
         return mSettingsIconPath;
@@ -411,6 +449,16 @@ namespace hal
     void MainWindow::setSaveIconStyle(const QString& style)
     {
         mSaveIconStyle = style;
+    }
+
+    void MainWindow::setSaveAsIconPath(const QString& path)
+    {
+        mSaveAsIconPath = path;
+    }
+
+    void MainWindow::setSaveAsIconStyle(const QString& style)
+    {
+        mSaveAsIconStyle = style;
     }
 
     void MainWindow::setSettingsIconPath(const QString& path)
@@ -593,6 +641,18 @@ namespace hal
         gPythonContext->updateNetlist();
     }
 
+    void MainWindow::handleActionExport()
+    {
+        if (!gNetlist) return;
+        QAction* act = static_cast<QAction*>(sender());
+        if (!act || act->data().isNull()) return;
+
+        ExportRegisteredFormat erf(act->data().toStringList());
+        if (erf.queryFilename())
+            erf.exportNetlist();
+
+    }
+
     void MainWindow::handleSaveAsTriggered()
     {
         QString filename = saveHandler();
@@ -688,6 +748,12 @@ namespace hal
     void MainWindow::handleActionMacroStep()
     {
         UserActionManager::instance()->nextMacroStep();
+    }
+    
+    void MainWindow::handleActionAbout()
+    {
+        AboutDialog ad;
+        ad.exec();
     }
 
     void MainWindow::handleActionUndo()

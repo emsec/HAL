@@ -55,6 +55,24 @@ namespace hal
     {
     public:
         /**
+         * Check whether two gates are equal.
+         * Does not check for connected nets or containing module.
+         *
+         * @param[in] other - The gate to compare against.
+         * @returns True if both gates are equal, false otherwise.
+         */
+        bool operator==(const Gate& other) const;
+
+        /**
+         * Check whether two gates are unequal.
+         * Does not check for connected nets or containing module.
+         *
+         * @param[in] other - The gate to compare against.
+         * @returns True if both gates are unequal, false otherwise.
+         */
+        bool operator!=(const Gate& other) const;
+
+        /**
          * Get the unique id of the gate.
          *
          * @returns The unique id.
@@ -73,7 +91,7 @@ namespace hal
          *
          * @returns The name.
          */
-        std::string get_name() const;
+        const std::string& get_name() const;
 
         /**
          * Set the name of the gate.
@@ -220,14 +238,14 @@ namespace hal
          *
          * @returns True if the gate is a global vcc gate.
          */
-        bool is_vcc_gate();
+        bool is_vcc_gate() const;
 
         /**
          * Checks whether this gate is a global gnd gate.
          *
          * @returns True if the gate is a global gnd gate.
          */
-        bool is_gnd_gate();
+        bool is_gnd_gate() const;
 
         /*
          *      pin specific functions
@@ -248,15 +266,14 @@ namespace hal
         std::vector<std::string> get_output_pins() const;
 
         /**
-         * Get a list of all fan-in nets of the gate, i.e. all nets that are connected to one of the input pins.
+         * Get a list of all fan-in nets of the gate, i.e., all nets that are connected to one of the input pins.
          *
          * @returns A vector of all connected input nets.
          */
         std::vector<Net*> get_fan_in_nets() const;
 
         /**
-         * Get a list of all fan-in endpoints of the gate,
-         * i.e. all connected endpoints that represent an input pin of this gate.
+         * Get a list of all fan-in endpoints of the gate, i.e., all connected endpoints that represent an input pin of this gate.
          *
          * @returns A vector of all connected input endpoints.
          */
@@ -281,15 +298,14 @@ namespace hal
         Endpoint* get_fan_in_endpoint(const std::string& pin) const;
 
         /**
-         * Get a list of all fan-out nets of the gate, i.e. all nets that are connected to one of the output pins.
+         * Get a list of all fan-out nets of the gate, i.e., all nets that are connected to one of the output pins.
          *
          * @returns A vector of all connected output nets.
          */
         std::vector<Net*> get_fan_out_nets() const;
 
         /**
-         * Get a list of all fan-out endpoints of the gate,
-         * i.e. all connected endpoints that represent an output pin of this gate.
+         * Get a list of all fan-out endpoints of the gate, i.e., all connected endpoints that represent an output pin of this gate.
          *
          * @returns A vector of all connected output endpoints.
          */
@@ -414,6 +430,6 @@ namespace hal
         std::vector<Net*> m_out_nets;
 
         /* dedicated functions */
-        std::map<std::string, BooleanFunction> m_functions;
+        std::unordered_map<std::string, BooleanFunction> m_functions;
     };
 }    // namespace hal

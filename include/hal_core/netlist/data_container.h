@@ -47,6 +47,22 @@ namespace hal
         virtual ~DataContainer() = default;
 
         /**
+         * Check whether two data containers are equal.
+         *
+         * @param[in] other - The data container to compare against.
+         * @returns True if both data containers are equal, false otherwise.
+         */
+        bool operator==(const DataContainer& other) const;
+
+        /**
+         * Check whether two data containers are unequal.
+         *
+         * @param[in] other - The data container to compare against.
+         * @returns True if both data containers are unequal, false otherwise.
+         */
+        bool operator!=(const DataContainer& other) const;
+
+        /**
         * Add a data entry.<br>
         * May overwrite an existing entry.
         *
@@ -83,7 +99,7 @@ namespace hal
          *
          * @returns The stored data as a map.
          */
-        std::map<std::tuple<std::string, std::string>, std::tuple<std::string, std::string>> get_data_map() const;
+        const std::map<std::tuple<std::string, std::string>, std::tuple<std::string, std::string>>& get_data_map() const;
 
         /**
          * Overwrite the existing data with a new map from ((1) category, (2) key) to ((1) type, (2) value).

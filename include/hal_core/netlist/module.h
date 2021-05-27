@@ -54,6 +54,24 @@ namespace hal
     {
     public:
         /**
+         * Check whether two modules are equal.
+         * Does not check for parent module.
+         *
+         * @param[in] other - The module to compare again.
+         * @returns True if both modules are equal, false otherwise.
+         */
+        bool operator==(const Module& other) const;
+
+        /**
+         * Check whether two modules are unequal.
+         * Does not check for parent module.
+         *
+         * @param[in] other - The module to compare again.
+         * @returns True if both modules are unequal, false otherwise.
+         */
+        bool operator!=(const Module& other) const;
+
+        /**
          * Get the unique ID of the module.
          *
          * @returns The unique id.
@@ -70,7 +88,7 @@ namespace hal
         /**
          * Set the name of the module.
          *
-         * @params[in] name - The new name.
+         * @param[in] name - The new name.
          */
         void set_name(const std::string& name);
 
@@ -84,7 +102,7 @@ namespace hal
         /**
          * Set the type of the module.
          *
-         * @params[in] type - The new type.
+         * @param[in] type - The new type.
          */
         void set_type(const std::string& type);
 
@@ -148,29 +166,32 @@ namespace hal
         Netlist* get_netlist() const;
 
         /**
-         * Get the input nets of this module.<br>
-         * An input net is either a global input to the netlist or has a source outside of the module.
+         * Get all nets that have at least one source or one destination within the module. Includes nets that are input and/or output to any of the submodules.
          *
-         * @returns The sorted vector of input nets.
+         * @returns A sorted vector of nets.
          */
-        std::vector<Net*> get_input_nets() const;
+        const std::vector<Net*>& get_nets() const;
 
         /**
-         * Get the output nets of this module.<br>
-         * An output net is either a global output to the netlist or has a destination outside of the module.
+         * Get all nets that are either a global input to the netlist or have at least one source outside of the module.
          *
-         * @returns The sorted vector of output nets.
+         * @returns A sorted vector of input nets.
          */
-        std::vector<Net*> get_output_nets() const;
+        const std::vector<Net*>& get_input_nets() const;
 
         /**
-         * Get the internal nets of this module.<br>
-         * An internal net has at least one source and one destination within the module.<br>
-         * Therefore it may contain some nets that are also regarded as input or output nets.
+         * Get all nets that are either a global output to the netlist or have at least one destination outside of the module.
          *
-         * @returns The sorted vector of internal nets.
+         * @returns A sorted vector of output nets.
          */
-        std::vector<Net*> get_internal_nets() const;
+        const std::vector<Net*>& get_output_nets() const;
+
+        /**
+         * Get all nets that have at least one source and one destination within the module, including its submodules. The result may contain nets that are also regarded as input or output nets.
+         *
+         * @returns A sorted vector of internal nets.
+         */
+        const std::vector<Net*>& get_internal_nets() const;
 
         /**
          * Set the name of the port corresponding to the specified input net.
@@ -186,7 +207,7 @@ namespace hal
          * @param[in] input_net - The input net.
          * @returns The input port name.
          */
-        std::string get_input_port_name(Net* input_net);
+        std::string get_input_port_name(Net* input_net) const;
 
         /**
          * Get the input net of the port corresponding to the specified port name.
@@ -194,7 +215,7 @@ namespace hal
          * @param[in] port_name - The input port name.
          * @returns The input net or a nullptr.
          */
-        Net* get_input_port_net(const std::string& port_name);
+        Net* get_input_port_net(const std::string& port_name) const;
 
         /**
          * Get the mapping of all input nets to their corresponding port names.
@@ -231,7 +252,7 @@ namespace hal
          * @param[in] output_net - The output net.
          * @returns The output port name.
          */
-        std::string get_output_port_name(Net* output_net);
+        std::string get_output_port_name(Net* output_net) const;
 
         /**
          * Get the output net of the port corresponding to the specified port name.
@@ -239,7 +260,7 @@ namespace hal
          * @param[in] port_name - The output port name.
          * @returns The output net or a nullptr.
          */
-        Net* get_output_port_net(const std::string& port_name);
+        Net* get_output_port_net(const std::string& port_name) const;
 
         /**
          * Get the mapping of all output nets to their corresponding port names.
@@ -261,6 +282,13 @@ namespace hal
          * @returns The next output port ID.
          */
         u32 get_next_output_port_id() const;
+
+        /**
+         * Mark all internal caches as dirty. Caches are primarily used for the nets connected to the gates of a module.
+         * 
+         * @param[in] is_dirty - True to mark caches as dirty, false otherwise.
+         */
+        void set_cache_dirty(bool is_dirty = true);
 
         /*
          * ################################################################
@@ -344,11 +372,15 @@ namespace hal
         mutable std::set<Net*> m_named_output_nets;                       // ordering necessary, cannot be replaced with unordered_set
         mutable std::map<Net*, std::string> m_input_net_to_port_name;     // ordering necessary, cannot be replaced with unordered_map
         mutable std::map<Net*, std::string> m_output_net_to_port_name;    // ordering necessary, cannot be replaced with unordered_map
+        mutable std::unordered_set<std::string> m_input_port_names;
+        mutable std::unordered_set<std::string> m_output_port_names;
 
         /* stores gates sorted by id */
         std::unordered_map<u32, Gate*> m_gates_map;
         std::vector<Gate*> m_gates;
 
+        mutable bool m_nets_dirty;
+        mutable std::vector<Net*> m_nets;
         mutable bool m_input_nets_dirty;
         mutable std::vector<Net*> m_input_nets;
         mutable bool m_output_nets_dirty;

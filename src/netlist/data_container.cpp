@@ -4,6 +4,16 @@
 
 namespace hal
 {
+    bool DataContainer::operator==(const DataContainer& other) const
+    {
+        return m_data == other.get_data_map();
+    }
+
+    bool DataContainer::operator!=(const DataContainer& other) const
+    {
+        return !operator==(other);
+    }
+
     bool DataContainer::set_data(const std::string& category, const std::string& key, const std::string& value_data_type, const std::string& value, const bool log_with_info_level)
     {
         if (category.empty() || key.empty())
@@ -59,7 +69,7 @@ namespace hal
         return true;
     }
 
-    std::map<std::tuple<std::string, std::string>, std::tuple<std::string, std::string>> DataContainer::get_data_map() const
+    const std::map<std::tuple<std::string, std::string>, std::tuple<std::string, std::string>>& DataContainer::get_data_map() const
     {
         return m_data;
     }

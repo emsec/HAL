@@ -18,14 +18,12 @@ namespace hal
     {
         m_modules.clear();
 
-        m_path = file_path;
-
         {
             std::ifstream ifs;
-            ifs.open(m_path.string(), std::ifstream::in);
+            ifs.open(file_path.string(), std::ifstream::in);
             if (!ifs.is_open())
             {
-                log_error("verilog_parser", "unable to open '{}'.", m_path.string());
+                log_error("verilog_parser", "unable to open '{}'.", file_path.string());
                 return false;
             }
             m_fs << ifs.rdbuf();
@@ -139,7 +137,7 @@ namespace hal
                     // implicit "0"
                     for (u32 i = 0; i < left_size - right_size; i++)
                     {
-                        module.m_expanded_assignments.push_back(std::make_pair(left_signals.at(i), "0"));
+                        module.m_expanded_assignments.push_back(std::make_pair(left_signals.at(i + right_size), "'0'"));
                     }
                 }
             }
@@ -455,6 +453,7 @@ namespace hal
         // parse parameter list
         if (m_token_stream.consume("#("))
         {
+            // TODO add support for parameter parsing
             m_token_stream.consume_until(")");
             m_token_stream.consume(")", true);
             log_warning("verilog_parser", "cannot parse parameter list provided for module '{}'.", module_name);
@@ -496,6 +495,13 @@ namespace hal
                 {
                     return false;
                 }
+            }
+            else if (next_token == "parameter")
+            {
+                // TODO add support for parameter parsing
+                m_token_stream.consume_until(";");
+                m_token_stream.consume(";", true);
+                log_warning("verilog_parser", "cannot parse parameter provided for module '{}'.", module_name);
             }
             else if (next_token == "assign")
             {
@@ -868,7 +874,7 @@ namespace hal
                         skip = true;
                     }
 
-                    if (value.size() == 1)
+                    if (value == "0" || value == "1")
                     {
                         data_type = "bit_value";
                     }
@@ -1132,9 +1138,9 @@ namespace hal
                     }
 
                     // merge generics and attributes
-                    for (const auto it : slave_net->get_data_map())
+                    for (const auto& [identifier, content] : slave_net->get_data_map())
                     {
-                        if (!master_net->set_data(std::get<0>(it.first), std::get<1>(it.first), std::get<0>(it.second), std::get<1>(it.second)))
+                        if (!master_net->set_data(std::get<0>(identifier), std::get<1>(identifier), std::get<0>(content), std::get<1>(content)))
                         {
                             log_warning("verilog_parser",
                                         "unable to transfer data from slave net '{}' with ID {} to master net '{}' with ID {}.",
@@ -1196,9 +1202,6 @@ namespace hal
     {
         std::unordered_map<std::string, std::string> signal_alias;
         std::unordered_map<std::string, std::string> instance_alias;
-
-        // const auto& e              = m_entities.at(entity_inst_type);
-        // const auto& entity_signals = e.get_signals();
 
         // TODO check parent module assignments for port aliases
 
@@ -1350,7 +1353,7 @@ namespace hal
             {
                 b = alias_it->second;
             }
-            else if(b == "'Z'" || b == "'X'") 
+            else if (b == "'Z'" || b == "'X'")
             {
                 continue;
             }
@@ -1369,7 +1372,7 @@ namespace hal
             const std::string& inst_type = verilog_module.m_instance_types.at(inst_identifier);
 
             // will later hold either module or gate, so attributes can be assigned properly
-            DataContainer* container;
+            DataContainer* container = nullptr;
 
             // assign actual signal names to ports
             std::unordered_map<std::string, std::string> instance_assignments;
@@ -1396,7 +1399,7 @@ namespace hal
                             {
                                 instance_assignments[port] = assignment;
                             }
-                            else if(assignment != "'Z'" && assignment != "'X'")
+                            else if (assignment != "'Z'" && assignment != "'X'")
                             {
                                 log_error("verilog_parser", "port assignment \"{} = {}\" is invalid for instance '{}' of type '{}'.", port, assignment, inst_identifier, inst_type);
                                 return nullptr;
@@ -1463,7 +1466,7 @@ namespace hal
                         {
                             signal = assignment;
                         }
-                        else if(assignment == "'Z'" || assignment == "'X'")
+                        else if (assignment == "'Z'" || assignment == "'X'")
                         {
                             continue;
                         }
@@ -1909,7 +1912,8 @@ namespace hal
         if (len != -1)
         {
             // fill with '0'
-            for (i32 i = 0; i < len - (i32)result.size(); i++)
+            i32 fill_width = len - (i32)result.size();
+            for (i32 i = 0; i < fill_width; i++)
             {
                 result.push_back("'0'");
             }

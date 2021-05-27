@@ -7,6 +7,8 @@
 !example_gate_library/**/*
 !gate_libraries*
 !gate_libraries/**/*
+!gexf_writer*
+!gexf_writer/**/*
 !graph_algorithm*
 !graph_algorithm/**/*
 !gui*
@@ -25,10 +27,10 @@
 !solve_fsm/**/*
 !verilog_parser*
 !verilog_parser/**/*
+!verilog_writer*
+!verilog_writer/**/*
 !vhdl_parser*
 !vhdl_parser/**/*
-!vhdl_verilog_writers*
-!vhdl_verilog_writers/**/*
 !z3_utils*
 !z3_utils/**/*
 !CMakeLists.txt

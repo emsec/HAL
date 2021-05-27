@@ -12,7 +12,6 @@
 #include "gui/graph_widget/graph_graphics_view.h"
 #include "gui/graph_widget/graph_widget.h"
 #include "gui/gui_utils/graphics.h"
-#include "gui/graphics/graphics_view.h"
 #include "gui/logger/logger_widget.h"
 #include "gui/module_widget/module_widget.h"
 #include "gui/python/python_console_widget.h"
@@ -22,7 +21,6 @@
 #include "gui/main_window/main_window.h"
 #include "hal_core/netlist/netlist.h"
 #include "hal_core/netlist/persistent/netlist_serializer.h"
-#include "gui/vhdl_editor/vhdl_editor.h"
 #include "gui/gui_utils/special_log_content_manager.h"
 #include "gui/gui_utils/sort.h"
 #include "gui/selection_details_widget/tree_navigation/selection_tree_view.h"
@@ -69,7 +67,7 @@ namespace hal
         mPythonWidget = new PythonEditor();
 
         connect(FileManager::get_instance(), &FileManager::fileOpened, this, &ContentManager::handleOpenDocument);
-        connect(FileManager::get_instance(), &FileManager::fileChanged, this, &ContentManager::handleFilsystemDocChanged);
+        //connect(FileManager::get_instance(), &FileManager::fileChanged, this, &ContentManager::handleFilsystemDocChanged);
     }
 
     ContentManager::~ContentManager()
@@ -136,7 +134,7 @@ namespace hal
         mMainWindow->addContent(mContextManagerWidget, 1, content_anchor::left);
         mContextManagerWidget->open();
 
-        mGroupingManagerWidget = new GroupingManagerWidget(mGraphTabWidget);
+        mGroupingManagerWidget = new GroupingManagerWidget();
         mMainWindow->addContent(mGroupingManagerWidget, 2, content_anchor::left);
         mGroupingManagerWidget->open();
 
@@ -226,18 +224,9 @@ namespace hal
         sSettingSearch->keySequenceChanged(sSettingSearch->value().toString());
     }
 
-    void ContentManager::handleFilsystemDocChanged(const QString& fileName)
-    {
-        Q_UNUSED(fileName)
-    }
-
     void ContentManager::setWindowTitle(const QString &filename)
     {
         mWindowTitle = "HAL - " + QString::fromStdString(std::filesystem::path(filename.toStdString()).stem().string());
         mMainWindow->setWindowTitle(mWindowTitle);
-    }
-
-    void ContentManager::handleSaveTriggered()
-    {
     }
 }

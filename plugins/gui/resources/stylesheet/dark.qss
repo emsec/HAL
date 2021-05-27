@@ -1142,6 +1142,9 @@ hal--MainWindow
     qproperty-saveIconStyle: "all->#3192C5";
     qproperty-saveIconPath: ":/icons/folder-down";
 
+    qproperty-saveAsIconStyle: "all->#3192C5";
+    qproperty-saveAsIconPath: ":/icons/save-as";
+
     qproperty-settingsIconStyle: "all->#AFB1B3";
     qproperty-settingsIconPath: ":/icons/settings";
 
@@ -1153,7 +1156,7 @@ hal--MainWindow
 
 hal--PythonQssAdapter
 {
-    qproperty-textColor: #DEE9AF;
+    /*qproperty-textColor: #DEE9AF;*/
     qproperty-keywordColor: #CC7832;
     qproperty-operator_color: #A9B7C6;
     qproperty-braceColor: #A9B7C6;
@@ -1162,13 +1165,6 @@ hal--PythonQssAdapter
     qproperty-numberColor: #6897BB;
     qproperty-singleQuotedStringColor: #A5C25C;
     qproperty-doubleQuotedStringColor: #A5C25C;
-    qproperty-commentColor: #629755;
-}
-
-hal--VhdlQssAdapter
-{
-    qproperty-keywordColor: #CC7832;
-    qproperty-numberColor: #6897BB;
     qproperty-commentColor: #629755;
 }
 

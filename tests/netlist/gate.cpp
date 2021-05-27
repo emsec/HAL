@@ -131,16 +131,181 @@ namespace hal
     TEST_F(GateTest, check_constructor)
     {
         TEST_START
-        // Create a Gate (id = 100) and append it to its netlist
-        auto nl        = test_utils::create_empty_netlist();
-        auto test_gate = nl->create_gate(MIN_GATE_ID + 100, test_utils::get_gate_type_by_name("gate_2_to_1"), "gate_name");
+        {
+            // Create a Gate (id = 100) and append it to its netlist
+            auto nl        = test_utils::create_empty_netlist();
+            auto test_gate = nl->create_gate(100, nl->get_gate_library()->get_gate_type_by_name("AND2"), "gate_name");
 
-        ASSERT_NE(test_gate, nullptr);
-        EXPECT_EQ(test_gate->get_id(), (u32)(MIN_GATE_ID + 100));
-        EXPECT_EQ(test_gate->get_type()->get_name(), "gate_2_to_1");
-        EXPECT_EQ(test_gate->get_name(), "gate_name");
-        EXPECT_EQ(test_gate->get_netlist(), nl.get());
+            ASSERT_NE(test_gate, nullptr);
+            EXPECT_EQ(test_gate->get_id(), 100);
+            EXPECT_EQ(test_gate->get_type()->get_name(), "AND2");
+            EXPECT_EQ(test_gate->get_name(), "gate_name");
+            EXPECT_EQ(test_gate->get_netlist(), nl.get());
+        }
+        TEST_END
+    }
 
+    /**
+     * Test operators for equality and inequality.
+     * 
+     * Functions: operator==, operator!=
+     */
+    TEST_F(GateTest, check_operators)
+    {
+        TEST_START
+        {
+            std::unique_ptr<Netlist> nl_1 = test_utils::create_empty_netlist();
+            ASSERT_NE(nl_1, nullptr);
+            std::unique_ptr<Netlist> nl_2 = test_utils::create_empty_netlist();
+            ASSERT_NE(nl_2, nullptr);
+            const GateLibrary* gl = nl_1->get_gate_library();
+            ASSERT_NE(gl, nullptr);
+            ASSERT_EQ(gl, nl_2->get_gate_library());
+
+            // standard stuff
+            Gate* nl1_g1 = nl_1->create_gate(1, gl->get_gate_type_by_name("AND2"), "gate_1");
+            ASSERT_NE(nl1_g1, nullptr);
+            Gate* nl2_g1 = nl_2->create_gate(1, gl->get_gate_type_by_name("AND2"), "gate_1");
+            ASSERT_NE(nl2_g1, nullptr);
+            Gate* nl1_g2 = nl_1->create_gate(2, gl->get_gate_type_by_name("AND2"), "gate_1");
+            ASSERT_NE(nl1_g2, nullptr);
+            Gate* nl2_g2 = nl_2->create_gate(2, gl->get_gate_type_by_name("AND2"), "gate_2");
+            ASSERT_NE(nl2_g2, nullptr);
+            Gate* nl1_g3 = nl_1->create_gate(3, gl->get_gate_type_by_name("AND2"), "gate_3");
+            ASSERT_NE(nl1_g3, nullptr);
+            Gate* nl2_g3 = nl_2->create_gate(3, gl->get_gate_type_by_name("OR2"), "gate_3");
+            ASSERT_NE(nl2_g3, nullptr);
+
+            // GND/VCC gates
+            Gate* nl1_g4 = nl_1->create_gate(4, gl->get_gate_type_by_name("GND"), "gnd");
+            ASSERT_NE(nl1_g4, nullptr);
+            nl1_g4->mark_gnd_gate();
+            Gate* nl2_g4 = nl_2->create_gate(4, gl->get_gate_type_by_name("GND"), "gnd");
+            ASSERT_NE(nl2_g4, nullptr);
+            Gate* nl1_g5 = nl_1->create_gate(5, gl->get_gate_type_by_name("VCC"), "vcc");
+            ASSERT_NE(nl1_g5, nullptr);
+            nl1_g5->mark_vcc_gate();
+            Gate* nl2_g5 = nl_2->create_gate(5, gl->get_gate_type_by_name("VCC"), "vcc");
+            ASSERT_NE(nl2_g5, nullptr);
+
+            // locations
+            Gate* nl1_g6 = nl_1->create_gate(6, gl->get_gate_type_by_name("AND2"), "gate_6", 20, 30);
+            ASSERT_NE(nl1_g6, nullptr);
+            Gate* nl2_g6 = nl_2->create_gate(6, gl->get_gate_type_by_name("AND2"), "gate_6", 20, 30);
+            ASSERT_NE(nl2_g6, nullptr);
+            Gate* nl1_g7 = nl_1->create_gate(7, gl->get_gate_type_by_name("AND2"), "gate_7", 20, 30);
+            ASSERT_NE(nl1_g7, nullptr);
+            Gate* nl2_g7 = nl_2->create_gate(7, gl->get_gate_type_by_name("AND2"), "gate_7", 10, 30);
+            ASSERT_NE(nl2_g7, nullptr);
+            Gate* nl1_g8 = nl_1->create_gate(8, gl->get_gate_type_by_name("AND2"), "gate_8", 20, 30);
+            ASSERT_NE(nl1_g8, nullptr);
+            Gate* nl2_g8 = nl_2->create_gate(8, gl->get_gate_type_by_name("AND2"), "gate_8", 20, 40);
+            ASSERT_NE(nl2_g8, nullptr);
+
+            // data
+            Gate* nl1_g9 = nl_1->create_gate(9, gl->get_gate_type_by_name("AND2"), "gate_9");
+            ASSERT_NE(nl1_g9, nullptr);
+            nl1_g9->set_data("some", "random", "string", "data");
+            Gate* nl2_g9 = nl_2->create_gate(9, gl->get_gate_type_by_name("AND2"), "gate_9");
+            ASSERT_NE(nl2_g9, nullptr);
+            nl2_g9->set_data("some", "random", "string", "data");
+            Gate* nl1_g10 = nl_1->create_gate(10, gl->get_gate_type_by_name("AND2"), "gate_10");
+            ASSERT_NE(nl1_g10, nullptr);
+            nl1_g10->set_data("some", "random", "string", "data");
+            Gate* nl2_g10 = nl_2->create_gate(10, gl->get_gate_type_by_name("AND2"), "gate_10");
+            ASSERT_NE(nl2_g10, nullptr);
+            Gate* nl1_g11 = nl_1->create_gate(11, gl->get_gate_type_by_name("AND2"), "gate_11");
+            ASSERT_NE(nl1_g11, nullptr);
+            nl1_g11->set_data("some", "random", "string", "data");
+            Gate* nl2_g11 = nl_2->create_gate(11, gl->get_gate_type_by_name("AND2"), "gate_11");
+            ASSERT_NE(nl2_g11, nullptr);
+            nl1_g11->set_data("some", "other", "string", "data");
+
+            // Boolean functions
+            Gate* nl1_g12 = nl_1->create_gate(12, gl->get_gate_type_by_name("AND2"), "gate_12");
+            ASSERT_NE(nl1_g12, nullptr);
+            nl1_g12->add_boolean_function("test", BooleanFunction::from_string("A & B"));
+            Gate* nl2_g12 = nl_2->create_gate(12, gl->get_gate_type_by_name("AND2"), "gate_12");
+            ASSERT_NE(nl2_g12, nullptr);
+            nl2_g12->add_boolean_function("test", BooleanFunction::from_string("A & B"));
+            Gate* nl1_g13 = nl_1->create_gate(13, gl->get_gate_type_by_name("AND2"), "gate_13");
+            ASSERT_NE(nl1_g13, nullptr);
+            nl1_g13->add_boolean_function("test", BooleanFunction::from_string("A & B"));
+            Gate* nl2_g13 = nl_2->create_gate(13, gl->get_gate_type_by_name("AND2"), "gate_13");
+            ASSERT_NE(nl2_g13, nullptr);
+            Gate* nl1_g14 = nl_1->create_gate(14, gl->get_gate_type_by_name("AND2"), "gate_14");
+            ASSERT_NE(nl1_g14, nullptr);
+            nl1_g14->add_boolean_function("test", BooleanFunction::from_string("A & B"));
+            Gate* nl2_g14 = nl_2->create_gate(14, gl->get_gate_type_by_name("AND2"), "gate_14");
+            ASSERT_NE(nl2_g14, nullptr);
+            nl2_g14->add_boolean_function("test", BooleanFunction::from_string("A | B"));
+
+            EXPECT_TRUE(*nl1_g1 == *nl1_g1);        // identical gate pointer
+            EXPECT_TRUE(*nl2_g1 == *nl2_g1); 
+            EXPECT_TRUE(*nl1_g1 == *nl2_g1);        // identical gates, but different netlists
+            EXPECT_TRUE(*nl2_g1 == *nl1_g1);
+            EXPECT_FALSE(*nl1_g1 == *nl1_g2);       // different IDs
+            EXPECT_FALSE(*nl2_g1 == *nl2_g2);
+            EXPECT_FALSE(*nl1_g2 == *nl2_g2);       // different names
+            EXPECT_FALSE(*nl2_g2 == *nl1_g2);
+            EXPECT_FALSE(*nl1_g3 == *nl2_g3);       // different gate types
+            EXPECT_FALSE(*nl2_g3 == *nl1_g3);
+            EXPECT_FALSE(*nl1_g4 == *nl2_g4);       // one not marked as GND gate
+            EXPECT_FALSE(*nl2_g4 == *nl1_g4);
+            EXPECT_FALSE(*nl1_g5 == *nl2_g5);       // one not marked as VCC gate
+            EXPECT_FALSE(*nl2_g5 == *nl1_g5);
+            EXPECT_TRUE(*nl1_g6 == *nl2_g6);        // identical locations
+            EXPECT_TRUE(*nl2_g6 == *nl1_g6);
+            EXPECT_FALSE(*nl1_g7 == *nl2_g7);       // different x location
+            EXPECT_FALSE(*nl2_g7 == *nl1_g7); 
+            EXPECT_FALSE(*nl1_g8 == *nl2_g8);       // different y location
+            EXPECT_FALSE(*nl2_g8 == *nl1_g8);
+            EXPECT_TRUE(*nl1_g9 == *nl2_g9);        // identical data
+            EXPECT_TRUE(*nl2_g9 == *nl1_g9);
+            EXPECT_FALSE(*nl1_g10 == *nl2_g10);     // data missing
+            EXPECT_FALSE(*nl2_g10 == *nl1_g10);
+            EXPECT_FALSE(*nl1_g11 == *nl2_g11);     // different data
+            EXPECT_FALSE(*nl2_g11 == *nl1_g11);
+            EXPECT_TRUE(*nl1_g12 == *nl2_g12);      // identical Boolean function
+            EXPECT_TRUE(*nl2_g12 == *nl1_g12);
+            EXPECT_FALSE(*nl1_g13 == *nl2_g13);     // Boolean function missing
+            EXPECT_FALSE(*nl2_g13 == *nl1_g13);
+            EXPECT_FALSE(*nl1_g14 == *nl2_g14);     // different Boolean functions
+            EXPECT_FALSE(*nl2_g14 == *nl1_g14);
+
+            EXPECT_FALSE(*nl1_g1 != *nl1_g1);       // identical gate pointer
+            EXPECT_FALSE(*nl2_g1 != *nl2_g1); 
+            EXPECT_FALSE(*nl1_g1 != *nl2_g1);       // identical gates, but different netlists
+            EXPECT_FALSE(*nl2_g1 != *nl1_g1);
+            EXPECT_TRUE(*nl1_g1 != *nl1_g2);        // different IDs
+            EXPECT_TRUE(*nl2_g1 != *nl2_g2);
+            EXPECT_TRUE(*nl1_g2 != *nl2_g2);        // different names
+            EXPECT_TRUE(*nl2_g2 != *nl1_g2);
+            EXPECT_TRUE(*nl1_g3 != *nl2_g3);        // different gate types
+            EXPECT_TRUE(*nl2_g3 != *nl1_g3);
+            EXPECT_TRUE(*nl1_g4 != *nl2_g4);        // one not marked as GND gate
+            EXPECT_TRUE(*nl2_g4 != *nl1_g4);
+            EXPECT_TRUE(*nl1_g5 != *nl2_g5);        // one not marked as VCC gate
+            EXPECT_TRUE(*nl2_g5 != *nl1_g5);
+            EXPECT_FALSE(*nl1_g6 != *nl2_g6);       // identical locations
+            EXPECT_FALSE(*nl2_g6 != *nl1_g6);
+            EXPECT_TRUE(*nl1_g7 != *nl2_g7);        // different x location
+            EXPECT_TRUE(*nl2_g7 != *nl1_g7); 
+            EXPECT_TRUE(*nl1_g8 != *nl2_g8);        // different y location
+            EXPECT_TRUE(*nl2_g8 != *nl1_g8);
+            EXPECT_FALSE(*nl1_g9 != *nl2_g9);       // identical data
+            EXPECT_FALSE(*nl2_g9 != *nl1_g9);
+            EXPECT_TRUE(*nl1_g10 != *nl2_g10);      // data missing
+            EXPECT_TRUE(*nl2_g10 != *nl1_g10);
+            EXPECT_TRUE(*nl1_g11 != *nl2_g11);      // different data
+            EXPECT_TRUE(*nl2_g11 != *nl1_g11);
+            EXPECT_FALSE(*nl1_g12 != *nl2_g12);     // identical Boolean function
+            EXPECT_FALSE(*nl2_g12 != *nl1_g12);
+            EXPECT_TRUE(*nl1_g13 != *nl2_g13);      // Boolean function missing
+            EXPECT_TRUE(*nl2_g13 != *nl1_g13);
+            EXPECT_TRUE(*nl1_g14 != *nl2_g14);      // different Boolean functions
+            EXPECT_TRUE(*nl2_g14 != *nl1_g14);
+        }
         TEST_END
     }
 
@@ -157,7 +322,7 @@ namespace hal
         // ########################
         // Create a Gate and append it to its netlist
         auto nl         = test_utils::create_empty_netlist();
-        Gate* test_gate = nl->create_gate(MIN_GATE_ID + 0, test_utils::get_gate_type_by_name("gate_2_to_1"), "gate_name");
+        Gate* test_gate = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("AND2"), "gate_name");
 
         EXPECT_EQ(test_gate->get_name(), "gate_name");
 
@@ -191,7 +356,7 @@ namespace hal
         TEST_START
         // Create a Gate and append it to its netlist
         auto nl         = test_utils::create_empty_netlist();
-        Gate* test_gate = nl->create_gate(MIN_GATE_ID + 0, test_utils::get_gate_type_by_name("gate_2_to_1"), "gate_name");
+        Gate* test_gate = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("AND2"), "gate_name");
 
         EXPECT_EQ(test_gate->get_input_pins(), std::vector<std::string>({"I0", "I1"}));
         EXPECT_EQ(test_gate->get_output_pins(), std::vector<std::string>({"O"}));
@@ -642,7 +807,7 @@ namespace hal
         TEST_START
         {// Mark and unmark a global vcc Gate
             auto nl = test_utils::create_empty_netlist();
-            Gate* vcc_gate = nl->create_gate(MIN_GATE_ID + 0, test_utils::get_gate_type_by_name("vcc"), "vcc_gate");
+            Gate* vcc_gate = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("VCC"), "vcc_gate");
 
             vcc_gate->mark_vcc_gate();
             EXPECT_TRUE(vcc_gate->is_vcc_gate());
@@ -655,7 +820,7 @@ namespace hal
         {
             // Mark and unmark a global gnd Gate
             auto nl        = test_utils::create_empty_netlist();
-            Gate* gnd_gate = nl->create_gate(MIN_GATE_ID + 0, test_utils::get_gate_type_by_name("gnd"), "gnd_gate");
+            Gate* gnd_gate = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("GND"), "gnd_gate");
 
             gnd_gate->mark_gnd_gate();
             EXPECT_TRUE(gnd_gate->is_gnd_gate());
@@ -679,7 +844,7 @@ namespace hal
         {// get the Module of a Gate (the top_module), then add it to another Module and check again
             // -- create the Gate at the top_module
             auto nl = test_utils::create_empty_netlist();
-            Gate* test_gate = nl->create_gate(test_utils::get_gate_type_by_name("gate_1_to_1"), "test_gate");
+            Gate* test_gate = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("BUF"), "test_gate");
 
             EXPECT_EQ(test_gate->get_module(), nl->get_top_module());
 
@@ -706,7 +871,7 @@ namespace hal
         TEST_START
         {// get the grouping of a Gate (nullptr), then add it to another grouping and check again
             auto nl = test_utils::create_empty_netlist();
-            Gate* test_gate = nl->create_gate(MIN_GATE_ID + 0, test_utils::get_gate_type_by_name("gate_1_to_1"), "test_gate");
+            Gate* test_gate = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("BUF"), "test_gate");
 
             EXPECT_EQ(test_gate->get_grouping(), nullptr);
 
@@ -733,7 +898,7 @@ namespace hal
         TEST_START
         {// Create a Gate with a location and change it afterwards
             auto nl = test_utils::create_empty_netlist();
-            Gate* test_gate = nl->create_gate(MIN_GATE_ID + 0, test_utils::get_gate_type_by_name("gate_1_to_1"), "test_gate", 1, 2);
+            Gate* test_gate = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("BUF"), "test_gate", 1, 2);
             EXPECT_EQ(test_gate->get_location_x(), 1);
             EXPECT_EQ(test_gate->get_location_y(), 2);
             EXPECT_EQ(test_gate->get_location(), std::make_pair(1, 2));
@@ -753,7 +918,7 @@ namespace hal
         {
             // Test the has_location function
             auto nl         = test_utils::create_empty_netlist();
-            Gate* test_gate = nl->create_gate(MIN_GATE_ID + 0, test_utils::get_gate_type_by_name("gate_1_to_1"), "test_gate", 1, 2);
+            Gate* test_gate = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("BUF"), "test_gate", 1, 2);
             // -- both coordinates are >= 0
             test_gate->set_location(std::make_pair(1, 2));
             EXPECT_TRUE(test_gate->has_location());
@@ -778,73 +943,39 @@ namespace hal
     TEST_F(GateTest, check_boolean_function_access)
     {
         TEST_START
-
-        BooleanFunction bf_i        = BooleanFunction::from_string("I", std::vector<std::string>({"I"}));
-        BooleanFunction bf_i_invert = BooleanFunction::from_string("!I", std::vector<std::string>({"I"}));
-
-        auto inv_gl_owner = std::make_unique<GateLibrary>("imaginary_path", "TEST_LIB");
-        auto inv_gl = inv_gl_owner.get();
-        auto inv_gate_type = inv_gl->create_gate_type("gate_1_to_1_inv");
-        inv_gate_type->add_input_pin("I");
-        inv_gate_type->add_output_pin("O");
-        inv_gate_type->add_boolean_function("O", bf_i_invert);
-
         {
             // Access the boolean function of a gate_type
-            auto nl                                             = std::make_unique<Netlist>(inv_gl);
-            Gate* test_gate                                     = nl->create_gate(MIN_GATE_ID + 0, test_utils::get_gate_type_by_name("gate_1_to_1_inv", inv_gl), "test_gate");
-            std::unordered_map<std::string, BooleanFunction> bf = test_gate->get_boolean_functions();
-            EXPECT_EQ(bf, (std::unordered_map<std::string, BooleanFunction>({{"O", bf_i_invert}})));
-        }
-        {
-            // Add a custom boolean function
-            auto nl         = std::make_unique<Netlist>(inv_gl);
-            Gate* test_gate = nl->create_gate(MIN_GATE_ID + 0, inv_gate_type, "test_gate");
-            test_gate->add_boolean_function("new_bf", bf_i);
+            auto nl = test_utils::create_empty_netlist();
+            Gate* test_gate = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("INV"), "test_gate");
+            std::unordered_map<std::string, BooleanFunction> functions = test_gate->get_boolean_functions();
+            EXPECT_EQ(functions, (std::unordered_map<std::string, BooleanFunction>({{"O", BooleanFunction::from_string("!I")}})));
 
-            // -- get all boolean functions
-            std::unordered_map<std::string, BooleanFunction> bf_all = test_gate->get_boolean_functions();
-            EXPECT_EQ(bf_all, (std::unordered_map<std::string, BooleanFunction>({{"O", bf_i_invert}, {"new_bf", bf_i}})));
-            // -- get only custom boolean functions via get_boolean_functions
-            std::unordered_map<std::string, BooleanFunction> bf_custom = test_gate->get_boolean_functions(true);
-            EXPECT_EQ(bf_custom, (std::unordered_map<std::string, BooleanFunction>({{"new_bf", bf_i}})));
+            test_gate->add_boolean_function("new_bf", BooleanFunction::from_string("I"));
 
-            // -- get boolean function of the Gate type by using the function get_boolean_function
-            EXPECT_EQ(test_gate->get_boolean_function("O"), bf_i_invert);
+            functions = test_gate->get_boolean_functions();
+            EXPECT_EQ(functions, (std::unordered_map<std::string, BooleanFunction>({{"O", BooleanFunction::from_string("!I")}, {"new_bf", BooleanFunction::from_string("I")}})));
 
-            // -- get the custom boolean function by using the function get_boolean_function
-            EXPECT_EQ(test_gate->get_boolean_function("new_bf"), bf_i);
+            EXPECT_EQ(test_gate->get_boolean_function("O"), BooleanFunction::from_string("!I"));
 
-            // -- get the boolean function by calling get_boolean_function with name (The first output pin should be taken)
-            EXPECT_EQ(test_gate->get_boolean_function(), bf_i_invert);
+            EXPECT_EQ(test_gate->get_boolean_function("new_bf"), BooleanFunction::from_string("I"));
+
+            // should be function of first output pin
+            EXPECT_EQ(test_gate->get_boolean_function(), BooleanFunction::from_string("!I"));
         }
         // NEGATIVE
         {
             // Get a boolean function for a name that is unknown.
-            auto nl         = std::make_unique<Netlist>(inv_gl);
-            Gate* test_gate = nl->create_gate(MIN_GATE_ID + 0, test_utils::get_gate_type_by_name("gate_1_to_1_inv", inv_gl), "test_gate");
+            auto nl = test_utils::create_empty_netlist();
+            Gate* test_gate = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("INV"), "test_gate");
 
-            EXPECT_EQ(test_gate->get_boolean_function("unknown_name"), BooleanFunction());
             EXPECT_TRUE(test_gate->get_boolean_function("unknown_name").is_empty());
         }
         {
             // Call the get_boolean_function function with no parameter, for a Gate with no outputs
-            GateLibrary gl("imaginary_path", "TEST_LIB");
-            auto empty_gate_type = gl.create_gate_type("EMPTY_GATE");
+            auto nl = test_utils::create_empty_netlist();
+            Gate* test_gate = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("RAM"), "test_gate");
 
-            Netlist nl(&gl);
-            auto empty_gate = nl.create_gate(MIN_GATE_ID + 0, empty_gate_type, "empty_gate");
-            EXPECT_TRUE(empty_gate->get_boolean_function().is_empty());
-        }
-        {
-            // Call the get_boolean_function function with no parameter, for a Gate with no outputs
-            GateLibrary gl("imaginary_path", "TEST_LIB");
-            auto empty_gate_type = gl.create_gate_type("EMPTY_GATE");
-            empty_gate_type->add_output_pin("");
-
-            Netlist nl(&gl);
-            auto empty_gate = nl.create_gate(MIN_GATE_ID + 0, empty_gate_type, "empty_gate");
-            EXPECT_TRUE(empty_gate->get_boolean_function().is_empty());
+            EXPECT_TRUE(test_gate->get_boolean_function().is_empty());
         }
         TEST_END
     }
@@ -856,129 +987,93 @@ namespace hal
      */
     TEST_F(GateTest, check_lut_function) {
         TEST_START
-        // Create a custom GateLibrary which contains custom lut gates
-        GateLibrary lib("imaginary_path", "TEST_LIB");
-        auto gl = &lib;
-        auto lut = gl->create_gate_type("LUT_GATE", {GateTypeProperty::lut});
-
-        std::vector<std::string> input_pins({"I0", "I1", "I2"});
-        std::vector<std::string> output_pins({"O_LUT", "O_normal", "O_LUT_other"});
-
-        lut->add_input_pins(input_pins);
-        lut->add_output_pins(output_pins);
-        lut->assign_pin_type("O_LUT", PinType::lut);
-        lut->assign_pin_type("O_LUT_other", PinType::lut);
-        lut->set_lut_init_ascending(true);
-        lut->set_config_data_identifier("data_identifier");
-        lut->set_config_data_category("data_category");
         {
             // Get the boolean function of the lut in different ways
             // is not taken into account!
-            auto nl = std::make_unique<Netlist>(gl);
-            Gate* lut_gate = nl->create_gate(MIN_GATE_ID + 0, lut, "lut");
+            auto nl = test_utils::create_empty_netlist();
+            GateType* lut_type = nl->get_gate_library()->get_gate_type_by_name("LUT3");
+            Gate* lut_gate = nl->create_gate(lut_type, "lut");
 
             int i = 1;
-            lut_gate->set_data(lut->get_config_data_category(),
-                            lut->get_config_data_identifier(),
+            lut_gate->set_data(lut_type->get_config_data_category(),
+                            lut_type->get_config_data_identifier(),
                             "bit_vector",
                             i_to_hex_string(i, 2));
 
             // Testing the access via the function get_boolean_function
-            EXPECT_EQ(lut_gate->get_boolean_function("O_LUT").get_truth_table(input_pins),
-                    get_truth_table_from_i(i, 8));
-            EXPECT_EQ(lut_gate->get_boolean_function("O_LUT_other").get_truth_table(input_pins),
-                    get_truth_table_from_i(i, 8));
+            EXPECT_EQ(lut_gate->get_boolean_function("O").get_truth_table(lut_type->get_input_pins()), get_truth_table_from_i(i, 8));
 
             // Test the access via the get_boolean_functions map
-            std::unordered_map<std::string, BooleanFunction> bfs = lut_gate->get_boolean_functions();
-            ASSERT_TRUE(bfs.find("O_LUT") != bfs.end());
-            EXPECT_EQ(bfs["O_LUT"].get_truth_table(input_pins), get_truth_table_from_i(i, 8));
-            ASSERT_TRUE(bfs.find("O_LUT_other") != bfs.end());
-            EXPECT_EQ(bfs["O_LUT_other"].get_truth_table(input_pins), get_truth_table_from_i(i, 8));
-
+            std::unordered_map<std::string, BooleanFunction> functions = lut_gate->get_boolean_functions();
+            ASSERT_TRUE(functions.find("O") != functions.end());
+            EXPECT_EQ(functions["O"].get_truth_table(lut_type->get_input_pins()), get_truth_table_from_i(i, 8));
         }
         {
             // Access the boolean function of a lut, that is stored in ascending order
-            auto nl = std::make_unique<Netlist>(gl);
-            Gate* lut_gate = nl->create_gate(MIN_GATE_ID + 0, lut, "lut");
-            for (int i = 0x0; i <= 0xff; i++) {
-                lut_gate->set_data(lut->get_config_data_category(),
-                                lut->get_config_data_identifier(),
+            auto nl = test_utils::create_empty_netlist();
+            GateType* lut_type = nl->get_gate_library()->get_gate_type_by_name("LUT3");
+            Gate* lut_gate = nl->create_gate(lut_type, "lut");
+
+            for (int i = 0x0; i <= 0xff; i++) 
+            {
+                lut_gate->set_data(lut_type->get_config_data_category(),
+                                lut_type->get_config_data_identifier(),
                                 "bit_vector",
                                 i_to_hex_string(i));
-                BooleanFunction bf = lut_gate->get_boolean_function("O_LUT");
-                EXPECT_EQ(bf.get_truth_table(input_pins),
+                EXPECT_EQ(lut_gate->get_boolean_function("O").get_truth_table(lut_type->get_input_pins()),
                         get_truth_table_from_hex_string(i_to_hex_string(i), 8, false));
             }
         }
         {
             // Access the boolean function of a lut, that is stored in descending order
-            lut->set_lut_init_ascending(false);
-            auto nl = std::make_unique<Netlist>(gl);
-            Gate* lut_gate = nl->create_gate(MIN_GATE_ID + 0, lut, "lut");
+            auto nl = test_utils::create_empty_netlist();
+            GateType* lut_type = nl->get_gate_library()->get_gate_type_by_name("LUT3");
+            Gate* lut_gate = nl->create_gate(lut_type, "lut");
+            lut_type->set_lut_init_ascending(false);
+
             for (int i = 0x0; i <= 0xff; i++) {
-                lut_gate->set_data(lut->get_config_data_category(),
-                                lut->get_config_data_identifier(),
+                lut_gate->set_data(lut_type->get_config_data_category(),
+                                lut_type->get_config_data_identifier(),
                                 "bit_vector",
                                 i_to_hex_string(i));
-                BooleanFunction bf = lut_gate->get_boolean_function("O_LUT");
-                EXPECT_EQ(bf.get_truth_table(input_pins),
+                EXPECT_EQ(lut_gate->get_boolean_function("O").get_truth_table(lut_type->get_input_pins()),
                         get_truth_table_from_hex_string(i_to_hex_string(i), 8, true));
             }
-            lut->set_lut_init_ascending(true);
+
+            lut_type->set_lut_init_ascending(true);
         }
         {
             // Add a boolean function to a lut pin
-            auto nl = std::make_unique<Netlist>(gl);
-            Gate* lut_gate = nl->create_gate(MIN_GATE_ID + 0, lut, "lut");
+            auto nl = test_utils::create_empty_netlist();
+            GateType* lut_type = nl->get_gate_library()->get_gate_type_by_name("LUT3");
+            Gate* lut_gate = nl->create_gate(lut_type, "lut");
 
-            BooleanFunction lut_bf = BooleanFunction::from_string("I0 | I1 | I2", input_pins);
-            lut_gate->add_boolean_function("O_LUT", lut_bf);
-            EXPECT_EQ(lut_gate->get_boolean_functions().size(), 2);
-            EXPECT_EQ(lut_gate->get_boolean_function("O_LUT"), lut_bf);
+            BooleanFunction lut_bf = BooleanFunction::from_string("I0 & I1 & I2");
+            lut_gate->add_boolean_function("O", lut_bf);
+            EXPECT_EQ(lut_gate->get_boolean_functions().size(), 1);
+            EXPECT_EQ(lut_gate->get_boolean_function("O"), lut_bf);
+            EXPECT_EQ(lut_gate->get_data(lut_type->get_config_data_category(), lut_type->get_config_data_identifier()), std::make_tuple(std::string("bit_vector"), std::string("1")));
         }
         // NEGATIVE
         {
-            // There is no hex string at the config data path (0 truth table)
-            auto nl = std::make_unique<Netlist>(gl);
-            Gate* lut_gate = nl->create_gate(MIN_GATE_ID + 0, lut, "lut");
-            lut_gate
-                ->set_data(lut->get_config_data_category(), lut->get_config_data_identifier(), "bit_vector", "");
-            EXPECT_EQ(lut_gate->get_boolean_function("O_LUT").get_truth_table(input_pins),
-                    get_truth_table_from_i(0, 8));
+            // There is an empty hex string at the config data path
+            auto nl = test_utils::create_empty_netlist();
+            GateType* lut_type = nl->get_gate_library()->get_gate_type_by_name("LUT3");
+            Gate* lut_gate = nl->create_gate(lut_type, "lut");
+
+            lut_gate->set_data(lut_type->get_config_data_category(), lut_type->get_config_data_identifier(), "bit_vector", "");
+            EXPECT_EQ(lut_gate->get_boolean_function("O").get_truth_table(lut_type->get_input_pins()), get_truth_table_from_i(0, 8));
         }
         {
-            // There is no hex string at the config data path
+            // There is invalid data at the config data path
             NO_COUT_TEST_BLOCK;
-            auto nl = std::make_unique<Netlist>(gl);
-            Gate* lut_gate = nl->create_gate(MIN_GATE_ID + 0, lut, "lut");
+            auto nl = test_utils::create_empty_netlist();
+            GateType* lut_type = nl->get_gate_library()->get_gate_type_by_name("LUT3");
+            Gate* lut_gate = nl->create_gate(lut_type, "lut");
 
-            lut_gate->set_data(lut->get_config_data_category(),
-                                lut->get_config_data_identifier(),
-                                "bit_vector",
-                                "NOHx");
-            EXPECT_EQ(lut_gate->get_boolean_function("O_LUT").get_truth_table(input_pins),
-                        std::vector<BooleanFunction::Value>(8, BooleanFunction::X));
+            lut_gate->set_data(lut_type->get_config_data_category(), lut_type->get_config_data_identifier(), "bit_vector", "NOHx");
+            EXPECT_EQ(lut_gate->get_boolean_function("O").get_truth_table(lut_type->get_input_pins()), std::vector<BooleanFunction::Value>(8, BooleanFunction::X));
 
-        }
-        {
-            // Test a lut with more than 6 inputs
-            NO_COUT_TEST_BLOCK;
-            std::vector<std::string> new_input_pins({"I3", "I4", "I5", "I6"});
-            lut->add_input_pins(new_input_pins);
-            input_pins.insert(input_pins.begin(), new_input_pins.begin(), new_input_pins.end());
-
-            auto nl = std::make_unique<Netlist>(gl);
-            Gate* lut_gate = nl->create_gate(MIN_GATE_ID + 0, lut, "lut");
-
-            std::string long_hex = "DEADBEEFC001D00DDEADC0DEDEADDA7A";
-
-            lut_gate->set_data(lut->get_config_data_category(),
-                                lut->get_config_data_identifier(),
-                                "bit_vector",
-                                long_hex);
-            EXPECT_EQ(lut_gate->get_boolean_function("O_LUT").get_truth_table(input_pins),
-                        std::vector<BooleanFunction::Value>((1 << input_pins.size()), BooleanFunction::X));
         }
         TEST_END
     }
@@ -1005,7 +1100,7 @@ namespace hal
 
             // -- check if the event is triggered
             std::unique_ptr<Netlist> nl = test_utils::create_empty_netlist();
-            Gate* test_gate             = nl->create_gate(MIN_GATE_ID + 1, test_utils::get_gate_type_by_name("gate_1_to_1"), "gate_name");
+            Gate* test_gate             = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("BUF"), "gate_name");
             EXPECT_EQ(gate_created_listener.get_event_count(), 1);
             EXPECT_EQ(gate_created_listener.get_last_parameters(), std::make_tuple(gate_event_handler::event::created, test_gate, NO_DATA));
 
@@ -1023,7 +1118,7 @@ namespace hal
 
             // -- check if the event is triggered
             std::unique_ptr<Netlist> nl = test_utils::create_empty_netlist();
-            Gate* test_gate             = nl->create_gate(MIN_GATE_ID + 1, test_utils::get_gate_type_by_name("gate_1_to_1"), "gate_name");
+            Gate* test_gate             = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("BUF"), "gate_name");
             EXPECT_EQ(gate_removed_listener.get_event_count(), 0);
             nl->delete_gate(test_gate);
             EXPECT_EQ(gate_removed_listener.get_event_count(), 1);
@@ -1043,7 +1138,7 @@ namespace hal
 
             // -- check if the event is triggered
             std::unique_ptr<Netlist> nl = test_utils::create_empty_netlist();
-            Gate* test_gate             = nl->create_gate(MIN_GATE_ID + 1, test_utils::get_gate_type_by_name("gate_1_to_1"), "gate_name");
+            Gate* test_gate             = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("BUF"), "gate_name");
             test_gate->set_name("gate_name");    // if the old name equals the new one, the event should not be triggered
             EXPECT_EQ(gate_name_changed_listener.get_event_count(), 0);
             gate_name_changed_listener.reset_events();
@@ -1066,7 +1161,7 @@ namespace hal
             // -- check if the event is triggered
             std::unique_ptr<Netlist> nl = test_utils::create_empty_netlist();
 
-            Gate* test_gate = nl->create_gate(MIN_GATE_ID + 1, test_utils::get_gate_type_by_name("gate_1_to_1"), "gate_name");
+            Gate* test_gate = nl->create_gate(nl->get_gate_library()->get_gate_type_by_name("BUF"), "gate_name");
             test_gate->set_location_x(1.23f);
             EXPECT_EQ(gate_location_changed_listener.get_event_count(), 1);
             EXPECT_EQ(gate_location_changed_listener.get_last_parameters(), std::make_tuple(gate_event_handler::event::location_changed, test_gate, NO_DATA));
@@ -1078,8 +1173,7 @@ namespace hal
             gate_location_changed_listener.reset_events();
 
             test_gate->set_location(std::make_pair(7.89f, 10.11));
-            if (test_utils::known_issue_tests_active())
-                EXPECT_EQ(gate_location_changed_listener.get_event_count(), 1);    // ISSUE: (?) Only one notification should be done
+            EXPECT_EQ(gate_location_changed_listener.get_event_count(), 2);    // throws two events
             EXPECT_EQ(gate_location_changed_listener.get_last_parameters(), std::make_tuple(gate_event_handler::event::location_changed, test_gate, NO_DATA));
             gate_location_changed_listener.reset_events();
 

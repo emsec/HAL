@@ -52,6 +52,22 @@ namespace hal
     {
     public:
         /**
+         * Check whether two nets are equal.
+         *
+         * @param[in] other - The net to compare against.
+         * @returns True if both nets are equal, false otherwise.
+         */
+        bool operator==(const Net& other) const;
+
+        /**
+         * Check whether two nets are unequal.
+         *
+         * @param[in] other - The net to compare against.
+         * @returns True if both nets are unequal, false otherwise.
+         */
+        bool operator!=(const Net& other) const;
+
+        /**
          * Get the unique id of the net.
          *
          * @returns The unique id.
@@ -70,7 +86,7 @@ namespace hal
          *
          * @returns The name.
          */
-        std::string get_name() const;
+        const std::string& get_name() const;
 
         /**
          * Set the name of the net.
@@ -229,11 +245,25 @@ namespace hal
         std::vector<Endpoint*> get_destinations(const std::function<bool(Endpoint* ep)>& filter = nullptr) const;
 
         /**
-         * Check whether the net is unrouted, i.e. it has no source or no destination.
+         * Check whether the net is unrouted, i.e., it has no source or no destination.
          *
-         * @returns True if the net is unrouted.
+         * @returns True if the net is unrouted, false otherwise.
          */
         bool is_unrouted() const;
+
+        /**
+         * Check whether the net is connected to GND.
+         *
+         * @returns True if the net is connected to GND, false otherwise.
+         */
+        bool is_gnd_net() const;
+
+        /**
+         * Check whether the net is connected to VCC.
+         *
+         * @returns True if the net is connected to VCC, false otherwise.
+         */
+        bool is_vcc_net() const;
 
         /**
          * Mark this net as a global input net.
@@ -268,14 +298,14 @@ namespace hal
          *
          * @returns True if the net is a global input net.
          */
-        bool is_global_input_net();
+        bool is_global_input_net() const;
 
         /**
          * Checks whether this net is a global output net.
          *
          * @returns True if the net is a global output net.
          */
-        bool is_global_output_net();
+        bool is_global_output_net() const;
 
     private:
         friend class NetlistInternalManager;
