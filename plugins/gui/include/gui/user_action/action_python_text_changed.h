@@ -11,7 +11,7 @@ namespace hal
     {
         QString mOldText;
         QString mText;
-        QUuid mPythonCodeEditorUUID;
+        u32 mPythonCodeEditorId;
 
         bool mLastKeyIsReturn;
         bool mMerged;
@@ -24,7 +24,7 @@ namespace hal
         // maximum duration in msec for single text change
         static qint64 sRecentTextChangeMsec;
     public:
-        ActionPythonTextChanged(const QString& oldtext_ = QString(), const QString& text_ = QString());
+        ActionPythonTextChanged(const u32& id_ = 0, const QString& oldtext_ = QString(), const QString& text_ = QString());
         QString tagname() const override;
         bool exec() override;
         void writeToXml(QXmlStreamWriter& xmlOut) const override;
@@ -33,8 +33,6 @@ namespace hal
 
         // needs to be deleted by caller since action was merged and not executed
         bool wasMergedWithRecent() const {return mMerged; }
-
-        void setPythonCodeEditorUUID(QUuid &uuid_);
 
         void setLastKeyIsReturn();
     };

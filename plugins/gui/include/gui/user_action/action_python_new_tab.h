@@ -12,9 +12,6 @@ namespace hal
         ActionPythonNewTab();
         QString tagname() const override;
         bool exec() override;
-        void writeToXml(QXmlStreamWriter& xmlOut) const override;
-        void readFromXml(QXmlStreamReader& xmlIn) override;
-        void addToHash(QCryptographicHash& cryptoHash) const override;
     };
 
     /**

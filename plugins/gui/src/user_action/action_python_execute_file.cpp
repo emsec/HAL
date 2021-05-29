@@ -5,7 +5,7 @@
 namespace hal
 {
     ActionPythonExecuteFileFactory::ActionPythonExecuteFileFactory()
-       : UserActionFactory("OpenPythonFile") {;}
+       : UserActionFactory("PythonExecuteFile") {;}
 
     ActionPythonExecuteFileFactory* ActionPythonExecuteFileFactory::sFactory = new ActionPythonExecuteFileFactory;
 
@@ -19,23 +19,37 @@ namespace hal
         return ActionPythonExecuteFileFactory::sFactory->tagname();
     }
 
-    ActionPythonExecuteFile::ActionPythonExecuteFile()
+    ActionPythonExecuteFile::ActionPythonExecuteFile(u32 id_)
+        : mPythonCodeEditorId(id_)
     {
         mWaitForReady = true;
+
+        if (id_)
+            setObject(UserActionObject(id_,UserActionObjectType::PythonCodeEditor));
     }
 
     bool ActionPythonExecuteFile::exec()
     {
-        gContentManager->getPythonEditorWidget()->runScript();
+        gContentManager->getPythonEditorWidget()->runScript(mPythonCodeEditorId);
         return UserAction::exec();
     }
 
     void ActionPythonExecuteFile::addToHash(QCryptographicHash& cryptoHash) const
-    {;}
+    {
+        cryptoHash.addData(QByteArray::number(mPythonCodeEditorId));
+    }
 
     void ActionPythonExecuteFile::writeToXml(QXmlStreamWriter& xmlOut) const
-    {;}
+    {
+        xmlOut.writeTextElement("uid", QString::number(mPythonCodeEditorId));
+    }
 
     void ActionPythonExecuteFile::readFromXml(QXmlStreamReader& xmlIn)
-    {;}
+    {
+        while (xmlIn.readNextStartElement())
+        {
+            if (xmlIn.name() == "uid")
+                mPythonCodeEditorId = xmlIn.readElementText().toInt();
+        }
+    }
 }

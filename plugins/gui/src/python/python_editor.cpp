@@ -36,7 +36,6 @@
 #include <fstream>
 #include <QDesktopServices>
 #include "gui/file_manager/file_manager.h"
-#include <QDebug>
 
 namespace hal
 {
@@ -256,7 +255,8 @@ namespace hal
                 {
                     QFileInfo original_path(val["path"].GetString());
 
-                    tabLoadFile(cnt - 1, original_path.filePath());
+                    u32 pythonCodeEditorId = dynamic_cast<PythonCodeEditor*>(mTabWidget->widget(cnt - 1))->id();
+                    tabLoadFile(pythonCodeEditorId, original_path.filePath());
                 }
             }
             if (root.HasMember("selected_tab"))
@@ -468,22 +468,23 @@ namespace hal
                         if (QMessageBox::question(editor, "Script has unsaved changes", "Do you want to reload the file from disk? Unsaved changes are lost.", QMessageBox::Yes | QMessageBox::No)
                             == QMessageBox::Yes)
                         {
-                            tabLoadFile(i, fileName);
+                            ActionPythonOpenFile* act = new ActionPythonOpenFile(editor->id(), fileName);
+                            act->exec();
                         }
                     }
                     return;
                 }
             }
 
-            newTab();
-            ActionPythonOpenFile* act = new ActionPythonOpenFile(mTabWidget->count() - 1, fileName);
+            u32 newId = newTab();
+            ActionPythonOpenFile* act = new ActionPythonOpenFile(newId, fileName);
             act->exec();
         }
 
         mLastOpenedPath = QFileInfo(file_names.last()).absolutePath();
     }
 
-    void PythonEditor::tabLoadFile(u32 index, QString fileName)
+    void PythonEditor::tabLoadFile(u32 uid, QString fileName)
     {
         std::ifstream file(fileName.toStdString(), std::ios::in);
 
@@ -495,7 +496,7 @@ namespace hal
         std::string f((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
         QFileInfo info(fileName);
 
-        auto tab = dynamic_cast<PythonCodeEditor*>(mTabWidget->widget(index));
+        auto tab = getPythonCodeEditorById(uid);
 
         tab->setPlainText(QString::fromStdString(f));
         tab->set_file_name(fileName);
@@ -561,13 +562,13 @@ namespace hal
             removeSnapshotFile(current_editor);
         }
 
-        ActionPythonSaveFile* act = new ActionPythonSaveFile(index, selected_file_name);
+        ActionPythonSaveFile* act = new ActionPythonSaveFile(current_editor->id(), selected_file_name);
         return act->exec();
     }
 
-    bool PythonEditor::execSaveFile(int index, QString selected_file_name)
+    bool PythonEditor::execSaveFile(int pythonCodeEditorId, QString selected_file_name)
     {
-        PythonCodeEditor* current_editor = dynamic_cast<PythonCodeEditor*>(mTabWidget->widget(index));
+        PythonCodeEditor* current_editor = getPythonCodeEditorById(pythonCodeEditorId);
 
         if (!current_editor)
             return false;
@@ -592,7 +593,7 @@ namespace hal
         mFileWatcher->addPath(selected_file_name);
 
         QFileInfo info(selected_file_name);
-        mTabWidget->setTabText(index, info.completeBaseName() + "." + info.completeSuffix());
+        mTabWidget->setTabText(getTabIndexByPythonCodeEditorId(pythonCodeEditorId), info.completeBaseName() + "." + info.completeSuffix());
         return true;
     }
 
@@ -670,11 +671,13 @@ namespace hal
 
     void PythonEditor::handleActionRun()
     {
-        ActionPythonExecuteFile* act = new ActionPythonExecuteFile();
+        u32 pythonCodeEditorId = dynamic_cast<PythonCodeEditor*>(mTabWidget->currentWidget())->id();
+
+        ActionPythonExecuteFile* act = new ActionPythonExecuteFile(pythonCodeEditorId);
         act->exec();
     }
 
-    void PythonEditor::runScript()
+    void PythonEditor::runScript(u32 id_)
     {
         // Update snapshots when clicking on run
         this->updateSnapshots();
@@ -684,7 +687,13 @@ namespace hal
             ctx->beginChange();
         }
 
-        gPythonContext->interpretScript(dynamic_cast<PythonCodeEditor*>(mTabWidget->currentWidget())->toPlainText());
+        PythonCodeEditor* pythonCodeEditor = getPythonCodeEditorById(id_);
+        if(!pythonCodeEditor) {
+            newTab(id_);
+            pythonCodeEditor = getPythonCodeEditorById(id_);
+        }
+
+        gPythonContext->interpretScript(pythonCodeEditor->toPlainText());
 
         for (const auto& ctx : gGraphContextManager->getContexts())
         {
@@ -698,9 +707,15 @@ namespace hal
         act->exec();
     }
 
-    void PythonEditor::newTab()
+    u32 PythonEditor::newTab(u32 pythonCodeEditorId)
     {
-        PythonCodeEditor* editor = new PythonCodeEditor(++mMaxPythonCodeEditorId);
+        if(!pythonCodeEditorId) {
+            pythonCodeEditorId = ++mMaxPythonCodeEditorId;
+        } else {
+            if(pythonCodeEditorId >= mMaxPythonCodeEditorId)
+                mMaxPythonCodeEditorId = pythonCodeEditorId + 1;
+        }
+        PythonCodeEditor* editor = new PythonCodeEditor(pythonCodeEditorId);
         editor->setFontSize(mSettingFontSize->value().toInt());
         editor->setMinimapEnabled(mSettingMinimap->value().toBool());
         editor->setLineWrapEnabled(mSettingLineWrap->value().toBool());
@@ -721,6 +736,8 @@ namespace hal
         //connect(editor, &PythonCodeEditor::modificationChanged, this, &PythonEditor::handleModificationChanged);
         connect(editor, &PythonCodeEditor::keyPressed, this, &PythonEditor::handleKeyPressed);
         connect(editor, &PythonCodeEditor::textChanged, this, &PythonEditor::handleTextChanged);
+        // return code editor id
+        return pythonCodeEditorId;
     }
 
     void PythonEditor::handleActionTabMenu()
@@ -855,8 +872,7 @@ namespace hal
     {
         PythonCodeEditor* current_editor = dynamic_cast<PythonCodeEditor*>(mTabWidget->currentWidget());
         mNewFileCounter++;
-        //tabLoadFile(current_editor, current_editor->getFileName());
-        tabLoadFile(mTabWidget->indexOf(current_editor), current_editor->getFileName());
+        tabLoadFile(current_editor->id(), current_editor->getFileName());
         current_editor->setBaseFileModified(false);
         mFileModifiedBar->setHidden(true);
     }
@@ -930,14 +946,14 @@ namespace hal
         {
             QFileInfo original_path(snapshot_original_path);
             bool load_snapshot = decideLoadSnapshot(saved_snapshots, original_path);
-            newTab();
+            u32 newPythonCodeEditorId = newTab();
             int tab_idx = mTabWidget->count() - 1;
-            tabLoadFile(tab_idx, original_path.filePath());
+            tabLoadFile(newPythonCodeEditorId, original_path.filePath());
             if(load_snapshot)
             {
                 this->setSnapshotContent(tab_idx, saved_snapshots[snapshot_original_path]);
             }
-            //(load_snapshot) ? tabLoadFile(tab_idx, original_path.filePath()) : setSnapshotContent(tab_idx, saved_snapshots[snapshot_original_path]);
+            //(load_snapshot) ? tabLoadFile(newPythonCodeEditorId, original_path.filePath()) : setSnapshotContent(tab_idx, saved_snapshots[snapshot_original_path]);
 
         }
 
@@ -1451,11 +1467,31 @@ namespace hal
         {
             QWidget* qWidget = qTabWidget->widget(i);
             PythonCodeEditor* pythonCodeEditor = dynamic_cast<PythonCodeEditor*>(qWidget);
-            if (!pythonCodeEditor) continue;
+            if (!pythonCodeEditor) {
+                continue;
+            }
             if(id == pythonCodeEditor->id()) {
                 return pythonCodeEditor;
             }
         }
         return nullptr;
+    }
+
+    int PythonEditor::getTabIndexByPythonCodeEditorId(u32 id)
+    {
+        QTabWidget* qTabWidget = gContentManager->getPythonEditorWidget()->getTabWidget();
+        int openTabs = qTabWidget->count();
+        for(int i = 0; i < openTabs; i++)
+        {
+            QWidget* qWidget = qTabWidget->widget(i);
+            PythonCodeEditor* pythonCodeEditor = dynamic_cast<PythonCodeEditor*>(qWidget);
+            if (!pythonCodeEditor) {
+                continue;
+            }
+            if(id == pythonCodeEditor->id()) {
+                return i;
+            }
+        }
+        return 0;
     }
 }

@@ -5,7 +5,7 @@
 namespace hal
 {
     ActionPythonSaveFileFactory::ActionPythonSaveFileFactory()
-       : UserActionFactory("SavePythonFile") {;}
+       : UserActionFactory("PythonSaveFile") {;}
 
     ActionPythonSaveFileFactory* ActionPythonSaveFileFactory::sFactory = new ActionPythonSaveFileFactory;
 
@@ -19,26 +19,30 @@ namespace hal
         return ActionPythonSaveFileFactory::sFactory->tagname();
     }
 
-    ActionPythonSaveFile::ActionPythonSaveFile(const u32 &tabIndex_, const QString &filename_)
-        : mTabIndex(tabIndex_), mFilename(filename_)
+    ActionPythonSaveFile::ActionPythonSaveFile(const u32 &id_, const QString &filename_)
+        : mPythonCodeEditorId(id_), mFilename(filename_)
     {
         mWaitForReady = true;
+
+        if (id_)
+            setObject(UserActionObject(id_,UserActionObjectType::PythonCodeEditor));
     }
 
     bool ActionPythonSaveFile::exec()
     {
-        if(!gContentManager->getPythonEditorWidget()->execSaveFile(mTabIndex, mFilename)) return false;
+        if(!gContentManager->getPythonEditorWidget()->execSaveFile(mPythonCodeEditorId, mFilename)) return false;
         return UserAction::exec();
     }
 
     void ActionPythonSaveFile::addToHash(QCryptographicHash& cryptoHash) const
     {
         cryptoHash.addData(mFilename.toUtf8());
+        cryptoHash.addData(QByteArray::number(mPythonCodeEditorId));
     }
 
     void ActionPythonSaveFile::writeToXml(QXmlStreamWriter& xmlOut) const
     {
-        xmlOut.writeTextElement("tabIndex", QString(mTabIndex));
+        xmlOut.writeTextElement("uid", QString::number(mPythonCodeEditorId));
         xmlOut.writeTextElement("filename", mFilename);
     }
 
@@ -48,8 +52,8 @@ namespace hal
         {
             if (xmlIn.name() == "filename")
                 mFilename = xmlIn.readElementText();
-            if (xmlIn.name() == "tabIndex")
-                mTabIndex = xmlIn.readElementText().toInt();
+            if (xmlIn.name() == "uid")
+                mPythonCodeEditorId = xmlIn.readElementText().toInt();
         }
     }
 }

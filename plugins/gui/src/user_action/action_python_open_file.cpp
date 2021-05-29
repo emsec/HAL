@@ -5,7 +5,7 @@
 namespace hal
 {
     ActionPythonOpenFileFactory::ActionPythonOpenFileFactory()
-       : UserActionFactory("OpenPythonFile") {;}
+       : UserActionFactory("PythonOpenFile") {;}
 
     ActionPythonOpenFileFactory* ActionPythonOpenFileFactory::sFactory = new ActionPythonOpenFileFactory;
 
@@ -19,26 +19,31 @@ namespace hal
         return ActionPythonOpenFileFactory::sFactory->tagname();
     }
 
-    ActionPythonOpenFile::ActionPythonOpenFile(const u32 &tabIndex_, const QString &filename_)
-        : mTabIndex(tabIndex_), mFilename(filename_)
+    ActionPythonOpenFile::ActionPythonOpenFile(const u32 &id_, const QString &filename_)
+        : mPythonCodeEditorId(id_), mFilename(filename_)
     {
         mWaitForReady = true;
+
+        if (id_)
+            setObject(UserActionObject(id_,UserActionObjectType::PythonCodeEditor));
     }
 
     bool ActionPythonOpenFile::exec()
     {
-        gContentManager->getPythonEditorWidget()->tabLoadFile(mTabIndex, mFilename);
+        gContentManager->getPythonEditorWidget()->tabLoadFile(mPythonCodeEditorId, mFilename);
         return UserAction::exec();
     }
 
     void ActionPythonOpenFile::addToHash(QCryptographicHash& cryptoHash) const
     {
         cryptoHash.addData(mFilename.toUtf8());
+        cryptoHash.addData(QByteArray::number(mPythonCodeEditorId));
     }
 
     void ActionPythonOpenFile::writeToXml(QXmlStreamWriter& xmlOut) const
     {
         xmlOut.writeTextElement("filename", mFilename);
+        xmlOut.writeTextElement("uid", QString::number(mPythonCodeEditorId));
     }
 
     void ActionPythonOpenFile::readFromXml(QXmlStreamReader& xmlIn)
@@ -47,6 +52,8 @@ namespace hal
         {
             if (xmlIn.name() == "filename")
                 mFilename = xmlIn.readElementText();
+            if (xmlIn.name() == "uid")
+                mPythonCodeEditorId = xmlIn.readElementText().toInt();
         }
     }
 }

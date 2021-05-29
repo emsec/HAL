@@ -97,8 +97,8 @@ namespace hal {
     QString UserActionObject::debugDump() const
     {
         if (mType==UserActionObjectType::None) return QString("-");
-        // None, Module, Gate, Net, Grouping, Netlist, Context, Port
-        const char* cType = "-mgn{Lxp";
+        // None, Module, Gate, Net, Grouping, Netlist, Context, Port, PythonCodeEditor
+        const char* cType = "-mgn{Lxpe";
         return QString("%1%2%3").arg(cType[mType]).arg(mId)
                 .arg(mType==UserActionObjectType::Grouping? "}" : "");
     }

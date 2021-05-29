@@ -8,8 +8,9 @@ namespace hal
      */
     class ActionPythonExecuteFile : public UserAction
     {
+        u32 mPythonCodeEditorId;
     public:
-        ActionPythonExecuteFile();
+        ActionPythonExecuteFile(u32 id_ = 0);
         QString tagname() const override;
         bool exec() override;
         void writeToXml(QXmlStreamWriter& xmlOut) const override;

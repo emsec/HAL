@@ -5,7 +5,7 @@
 namespace hal
 {
     ActionPythonNewTabFactory::ActionPythonNewTabFactory()
-       : UserActionFactory("NewPythonTab") {;}
+       : UserActionFactory("PythonNewTab") {;}
 
     ActionPythonNewTabFactory* ActionPythonNewTabFactory::sFactory = new ActionPythonNewTabFactory;
 
@@ -27,13 +27,4 @@ namespace hal
         gContentManager->getPythonEditorWidget()->newTab();
         return UserAction::exec();
     }
-
-    void ActionPythonNewTab::addToHash(QCryptographicHash& cryptoHash) const
-    {;}
-
-    void ActionPythonNewTab::writeToXml(QXmlStreamWriter& xmlOut) const
-    {;}
-
-    void ActionPythonNewTab::readFromXml(QXmlStreamReader& xmlIn)
-    {;}
 }

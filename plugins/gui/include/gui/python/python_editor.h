@@ -134,13 +134,13 @@ namespace hal
          * Action to execute the python script of the currently selected code editor (open tab).
          */
         void handleActionRun();
-        void runScript();
+        void runScript(u32 id_);
 
         /**
          * Action to create an empty new tab.
          */
         void handleActionNewTab();
-        void newTab();
+        u32 newTab(u32 pythonCodeEditorId = 0);
 
         /**
          * Action to create the menu when right-clicking on a tab. There the user may choose to close certain tabs or
@@ -436,6 +436,13 @@ namespace hal
          * @return PythonCodeEditor or nullptr
          */
         PythonCodeEditor* getPythonCodeEditorById(u32 id);
+
+        /**
+         * Get tab index by unique python code editor id
+         *
+         * @return int
+         */
+        int getTabIndexByPythonCodeEditorId(u32 id);
 
     Q_SIGNALS:
         void forwardStdout(const QString& output);

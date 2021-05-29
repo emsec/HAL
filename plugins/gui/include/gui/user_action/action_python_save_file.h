@@ -8,10 +8,10 @@ namespace hal
      */
     class ActionPythonSaveFile : public UserAction
     {
-        u32 mTabIndex;
+        u32 mPythonCodeEditorId;
         QString mFilename;
     public:
-        ActionPythonSaveFile(const u32& tabIndex_ = 0, const QString& filename_ = QString());
+        ActionPythonSaveFile(const u32& id_ = 0, const QString& filename_ = QString());
         QString tagname() const override;
         bool exec() override;
         void writeToXml(QXmlStreamWriter& xmlOut) const override;

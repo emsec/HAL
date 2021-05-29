@@ -33,8 +33,7 @@ namespace hal
     {
         if(UserActionManager::instance()->isUserTriggeredAction())
         {
-            ActionPythonTextChanged* act = new ActionPythonTextChanged(mOldPlaintext, toPlainText());
-            act->setPythonCodeEditorUUID(mUuid);
+            ActionPythonTextChanged* act = new ActionPythonTextChanged(mId, mOldPlaintext, toPlainText());
             if(mLastKeyPressed == Qt::Key_Return) act->setLastKeyIsReturn();
             act->exec();
             if (act->wasMergedWithRecent())
