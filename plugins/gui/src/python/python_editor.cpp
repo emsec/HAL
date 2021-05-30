@@ -354,11 +354,12 @@ namespace hal
 
     void PythonEditor::handleCurrentTabChanged(int index)
     {
+        /* Do not use this action for the moment as action got called even if not initiated by user
         if(UserActionManager::instance()->isUserTriggeredAction())
         {
             ActionPythonTabChanged* act = new ActionPythonTabChanged(index);
             act->exec();
-        }
+        } */
 
         Q_UNUSED(index)
 
@@ -712,6 +713,9 @@ namespace hal
         if(!pythonCodeEditorId) {
             pythonCodeEditorId = ++mMaxPythonCodeEditorId;
         } else {
+            if(getPythonCodeEditorById(pythonCodeEditorId)) {
+                pythonCodeEditorId = ++mMaxPythonCodeEditorId;
+            }
             if(pythonCodeEditorId >= mMaxPythonCodeEditorId)
                 mMaxPythonCodeEditorId = pythonCodeEditorId + 1;
         }

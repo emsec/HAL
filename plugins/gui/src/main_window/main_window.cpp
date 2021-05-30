@@ -793,6 +793,10 @@ namespace hal
         }
 
         saveState();
+#ifdef HAL_STUDY
+        log_info("gui", "HAL_STUDY activated. Dump of executed actions.");
+        UserActionManager::instance()->crashDump(2);
+#endif
         qApp->quit();
     }
 

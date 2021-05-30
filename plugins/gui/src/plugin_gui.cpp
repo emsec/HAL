@@ -84,6 +84,10 @@ namespace hal
         if (sig == SIGINT)
         {
             log_info("gui", "Detected Ctrl+C in terminal");
+#ifdef HAL_STUDY
+            log_info("gui", "HAL_STUDY activated. Dump of executed actions.");
+            UserActionManager::instance()->crashDump(sig);
+#endif
             QApplication::exit(0);
         }
     }

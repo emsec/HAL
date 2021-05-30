@@ -19,12 +19,35 @@ namespace hal
         return ActionPythonNewTabFactory::sFactory->tagname();
     }
 
-    ActionPythonNewTab::ActionPythonNewTab()
-    {;}
+    ActionPythonNewTab::ActionPythonNewTab(const u32 &id_)
+        : mPythonCodeEditorId(id_)
+    {
+        if (id_)
+            setObject(UserActionObject(id_,UserActionObjectType::PythonCodeEditor));
+    }
 
     bool ActionPythonNewTab::exec()
     {
-        gContentManager->getPythonEditorWidget()->newTab();
+        gContentManager->getPythonEditorWidget()->newTab(mPythonCodeEditorId);
         return UserAction::exec();
+    }
+
+    void ActionPythonNewTab::addToHash(QCryptographicHash& cryptoHash) const
+    {
+        cryptoHash.addData(QByteArray::number(mPythonCodeEditorId));
+    }
+
+    void ActionPythonNewTab::writeToXml(QXmlStreamWriter& xmlOut) const
+    {
+        xmlOut.writeTextElement("uid", QString::number(mPythonCodeEditorId));
+    }
+
+    void ActionPythonNewTab::readFromXml(QXmlStreamReader& xmlIn)
+    {
+        while (xmlIn.readNextStartElement())
+        {
+            if (xmlIn.name() == "uid")
+                mPythonCodeEditorId = xmlIn.readElementText().toInt();
+        }
     }
 }
