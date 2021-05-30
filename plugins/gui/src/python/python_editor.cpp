@@ -19,6 +19,7 @@
 #include "gui/user_action/action_python_open_file.h"
 #include "gui/user_action/action_python_execute_file.h"
 #include "gui/user_action/action_python_new_tab.h"
+#include "gui/user_action/action_python_close_tab.h"
 #include "gui/user_action/action_python_save_file.h"
 #include "gui/user_action/action_python_tab_changed.h"
 
@@ -297,12 +298,12 @@ namespace hal
                     saveFile(false, index);
 
             }
-            this->discardTab(index);
+            this->discardTab(editor->id());
 
         }
         else
         {
-            this->discardTab(index);
+            this->discardTab(editor->id());
         }
 
     }
@@ -604,9 +605,16 @@ namespace hal
     }
 
 
-    void PythonEditor::discardTab(int index)
+    void PythonEditor::discardTab(u32 pythonCodeEditorId)
     {
-        PythonCodeEditor* editor = dynamic_cast<PythonCodeEditor*>(mTabWidget->widget(index));
+        ActionPythonCloseTab* act = new ActionPythonCloseTab(pythonCodeEditorId);
+        act->exec();
+    }
+
+    void PythonEditor::execDiscardTab(u32 pythonCodeEditorId)
+    {
+        PythonCodeEditor* editor = getPythonCodeEditorById(pythonCodeEditorId);
+        int index = getTabIndexByPythonCodeEditorId(pythonCodeEditorId);
         QString s                  = editor->getFileName();
         if (!s.isEmpty())
         {
@@ -785,7 +793,7 @@ namespace hal
             return;
         for (int t = 0; t < tabs; t++)
         {
-            this->discardTab(0);
+            this->discardTab((dynamic_cast<PythonCodeEditor*>(mTabWidget->widget(0)))->id());
         }
     }
 
@@ -804,7 +812,7 @@ namespace hal
                 discard_id++;
                 continue;
             }
-            this->discardTab(discard_id);
+            this->discardTab((dynamic_cast<PythonCodeEditor*>(mTabWidget->widget(discard_id)))->id());
         }
     }
 
@@ -816,7 +824,7 @@ namespace hal
         for (int t = 0; t < mTabRightclicked; t++)
         {
             // IDs shift downwards during deletion
-            this->discardTab(0);
+            this->discardTab((dynamic_cast<PythonCodeEditor*>(mTabWidget->widget(0)))->id());
         }
     }
 
@@ -829,7 +837,7 @@ namespace hal
         for (int t = mTabRightclicked + 1; t < tabs; t++)
         {
             // IDs shift downwards during deletion
-            this->discardTab(mTabRightclicked + 1);
+            this->discardTab((dynamic_cast<PythonCodeEditor*>(mTabWidget->widget(mTabRightclicked + 1)))->id());
         }
     }
 
@@ -923,7 +931,7 @@ namespace hal
                 // The empty tab is closed to open all unstored snapshots
                 if(mTabWidget->count() == 1)
                 {
-                    this->discardTab(0);
+                    this->execDiscardTab((dynamic_cast<PythonCodeEditor*>(mTabWidget->widget(0)))->id());
                 }
             }
         }
@@ -977,8 +985,11 @@ namespace hal
         clearAllSnapshots(true);
 
         //clear all open tabs and reset the edior
-        while(mTabWidget->count() > 0)
-            discardTab(0);
+        while(mTabWidget->count() > 0) {
+            PythonCodeEditor* editor = dynamic_cast<PythonCodeEditor*>(mTabWidget->widget(0));
+            if(!editor) return;
+            execDiscardTab(editor->id());
+        }
         mNewFileCounter = 0;
         mLastClickTime  = 0;
         newTab();

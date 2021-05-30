@@ -214,7 +214,8 @@ namespace hal
          *
          * @param index - The index of the tab
          */
-        void discardTab(int index);
+        void discardTab(u32 pythonCodeEditorId);
+        void execDiscardTab(u32 pythonCodeEditorId);
 
         /**
          * Check for a given index range, if all tabs of these indexes should be discarded. If there are no unsaved
