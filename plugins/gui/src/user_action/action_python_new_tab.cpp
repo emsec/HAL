@@ -28,7 +28,8 @@ namespace hal
 
     bool ActionPythonNewTab::exec()
     {
-        gContentManager->getPythonEditorWidget()->newTab(mPythonCodeEditorId);
+        u32 pythonCodeEditorId = gContentManager->getPythonEditorWidget()->newTab(mPythonCodeEditorId);
+        mPythonCodeEditorId = pythonCodeEditorId;
         return UserAction::exec();
     }
 
