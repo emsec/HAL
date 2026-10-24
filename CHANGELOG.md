@@ -224,6 +224,7 @@ All notable changes to this project will be documented in this file.
     * removed a leftover debug output that printed every search string of the log widget to stdout
     * fixed the option to copy the gate library into the project directory in the netlist import dialog staying enabled when the gate library is detected automatically, in which case there is no file to copy and the option had no effect
     * fixed action enable behavior in View Manager when deleting an entry
+    * fixed pasting multi-line code into the Python console failing with `SyntaxError: invalid non-printable character U+2029`
 * Build and dependencies
   * changed the GUI from Qt 5 to Qt 6
   * updated the vendored QuaZip from 1.3 to 1.5 as part of the move to Qt 6
