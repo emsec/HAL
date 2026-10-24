@@ -302,6 +302,7 @@ namespace hal
             //        gPythonContext->addHistory(input);
             mHistory->addHistory(input.toStdString());
         }
+        input.replace(QChar::ParagraphSeparator, '\n');
         if ((!isCompound() && gPythonContext->checkCompleteStatement(input) != 0) || (isCompound() && input.isEmpty() && gPythonContext->checkCompleteStatement(input) != 0))
         {
             mCurrentCompoundInput += input;
@@ -311,7 +312,7 @@ namespace hal
             }
             else
             {
-                gPythonContext->interpretBackground(this, input, false);
+                gPythonContext->interpretBackground(this, input, input.contains('\n'));
             }
             mPromptType     = Standard;
             mCurrentCompoundInput = "";
