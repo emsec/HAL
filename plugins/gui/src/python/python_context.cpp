@@ -569,9 +569,15 @@ namespace hal
         PyCompilerFlags flags {PyCF_ONLY_AST, PY_MINOR_VERSION};
         PyObject* o = Py_CompileStringExFlags(text.toStdString().c_str(), "stdin", Py_file_input, &flags, 0);
         // if parsing failed (-> not a complete statement), nullptr is returned
-        // (apparently no need to PyObject_Free(o) here)
+        bool complete = o != nullptr;
+        // a failed parse leaves its error set, which would fail every later parse as well
+        if (!complete)
+        {
+            PyErr_Clear();
+        }
+        Py_XDECREF(o);
         PyGILState_Release(state);
-        return o != nullptr;
+        return complete;
 
         #endif
     }
